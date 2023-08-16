@@ -103,6 +103,13 @@ dependencies {
     // Navigation
     implementation ("androidx.navigation:navigation-compose:2.5.3")
 
+    // Datastore
+    implementation ("androidx.datastore:datastore-preferences:1.0.0")
+
+    // BioMetrics
+    implementation("androidx.biometric:biometric:1.2.0-alpha05")
+
+
 
 
 }

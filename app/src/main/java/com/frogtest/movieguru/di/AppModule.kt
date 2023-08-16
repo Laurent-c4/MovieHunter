@@ -5,6 +5,7 @@ import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.room.Room
+import com.frogtest.movieguru.MovieApp
 import com.frogtest.movieguru.data.cache.MovieDatabase
 import com.frogtest.movieguru.data.cache.MovieEntity
 import com.frogtest.movieguru.data.network.MovieAPI
@@ -22,9 +23,15 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object AppModule {
 
+    @Singleton
+    @Provides
+    fun provideApplication(@ApplicationContext app: Context): MovieApp {
+        return app as MovieApp
+    }
+
     @Provides
     @Singleton
-    fun provideBeerDatabase(@ApplicationContext context: Context): MovieDatabase {
+    fun provideMovieDatabase(@ApplicationContext context: Context): MovieDatabase {
         return Room.databaseBuilder(
             context,
             MovieDatabase::class.java,
