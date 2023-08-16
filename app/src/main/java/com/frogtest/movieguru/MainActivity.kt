@@ -2,11 +2,13 @@ package com.frogtest.movieguru
 
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.biometric.BiometricPrompt
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -21,6 +23,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -29,9 +32,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
+import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -50,10 +56,11 @@ import com.google.android.gms.auth.api.identity.Identity
 import com.sabasi.mobile.datastore.SettingsDataStore
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import java.util.concurrent.Executor
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class MainActivity : ComponentActivity() {
+class MainActivity : FragmentActivity() {
 
     companion object {
         private const val TAG = "MainActivity"
@@ -62,12 +69,17 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var settingsDataStore: SettingsDataStore
 
+    private lateinit var executor: Executor
+    private lateinit var biometricPrompt: BiometricPrompt
+    private lateinit var promptInfo: BiometricPrompt.PromptInfo
+
     private val googleAuthUIClient by lazy {
         GoogleAuthUIClient(context = applicationContext, oneTapClient = Identity.getSignInClient(applicationContext))
 }
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContent {
             MovieGuruTheme {
                 // A surface container using the 'background' color from the theme
@@ -83,9 +95,15 @@ class MainActivity : ComponentActivity() {
                     //set remember for showing and hiding settings dialog
                     val showSettingsDialog = remember { mutableStateOf(false) }
 
+                    val biometricsInitialised = remember { mutableStateOf(false) }
                     val useFingerprint = settingsDataStore.useFingerprint.value
 
-                  if (showSettingsDialog.value) {
+                    if (!biometricsInitialised.value) {
+                        initBiometrics(navController)
+                        biometricsInitialised.value = true
+                    }
+
+                    if (showSettingsDialog.value) {
                         SettingsDialog(
                             userData = googleAuthUIClient.getSignedInUser(),
                             onDismiss = { showSettingsDialog.value = false },
@@ -158,9 +176,7 @@ class MainActivity : ComponentActivity() {
 
                               LaunchedEffect(key1 = Unit) {
                                   if (googleAuthUIClient.getSignedInUser() !== null) {
-                                      navController.navigate("movies") {
-                                          popUpTo("auth") { inclusive = true }
-                                      }
+                                      onNavigate(useFingerprint, navController)
                                   }
                               }
 
@@ -181,9 +197,7 @@ class MainActivity : ComponentActivity() {
 
                               LaunchedEffect(key1 = state.isSignInSuccessful) {
                                   if (state.isSignInSuccessful) {
-                                      navController.navigate("movies") {
-                                          popUpTo("auth") { inclusive = true }
-                                      }
+                                      onNavigate(useFingerprint, navController)
                                       viewModel.resetState()
                                   }
                               }
@@ -212,8 +226,69 @@ class MainActivity : ComponentActivity() {
 
             }
         }
+    } }
+
+
+    @Composable
+    private fun initBiometrics(navController: NavHostController) {
+        executor = ContextCompat.getMainExecutor(this)
+        biometricPrompt = BiometricPrompt(this, executor,
+            object : BiometricPrompt.AuthenticationCallback() {
+                override fun onAuthenticationError(
+                    errorCode: Int,
+                    errString: CharSequence
+                ) {
+                    super.onAuthenticationError(errorCode, errString)
+                    Toast.makeText(
+                        applicationContext,
+                        "Authentication error: $errString", Toast.LENGTH_SHORT
+                    )
+                        .show()
+                }
+
+                override fun onAuthenticationSucceeded(
+                    result: BiometricPrompt.AuthenticationResult
+                ) {
+                    super.onAuthenticationSucceeded(result)
+                    Toast.makeText(
+                        applicationContext,
+                        "Authentication succeeded!", Toast.LENGTH_SHORT
+                    )
+                        .show()
+                    navigate(navController)
+                }
+
+                override fun onAuthenticationFailed() {
+                    super.onAuthenticationFailed()
+                    Toast.makeText(
+                        applicationContext, "Authentication failed",
+                        Toast.LENGTH_SHORT
+                    )
+                        .show()
+                }
+            })
+
+        promptInfo = BiometricPrompt.PromptInfo.Builder()
+            .setTitle("Additional security")
+            .setSubtitle("Confirm fingerprint to continue")
+            .setNegativeButtonText("Use account password")
+            .build()
     }
 
+    private fun onNavigate(
+        useFingerprint: Boolean,
+        navController: NavHostController
+    ) {
+        if (true) {
+            biometricPrompt.authenticate(promptInfo)
+        } else {
+            navigate(navController)
+        }
+    }
 
+    private fun navigate(navController: NavHostController) {
+        navController.navigate("movies") {
+            popUpTo("auth") { inclusive = true }
+        }
     }
 }
