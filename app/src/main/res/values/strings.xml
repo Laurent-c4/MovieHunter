@@ -1,4 +1,9 @@
 <resources>
     <string name="app_name">MovieGuru</string>
     <string name="default_web_client_id">1091323208239-pct0dggep1isi3u3ln9c9ked04kismve.apps.googleusercontent.com</string>
+    <string name="feedback">Feedback</string>
+    <string name="dismiss_dialog_button_text">Ok</string>
+    <string name="settings_title">Profile</string>
+    <string name="sign_out_button_text">Sign Out</string>
+    <string name="use_fingerprint">Unlock with fingerprint</string>
 </resources>
