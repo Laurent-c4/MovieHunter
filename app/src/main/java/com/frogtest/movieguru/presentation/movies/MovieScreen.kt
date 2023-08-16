@@ -1,4 +1,4 @@
-package com.frogtest.movieguru.presentation
+package com.frogtest.movieguru.presentation.movies
 
 import android.util.Log
 import android.widget.Toast
