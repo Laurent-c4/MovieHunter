@@ -55,60 +55,60 @@ fun MovieScreen(
             CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
         }
         else {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                items(
-                    count = movies.itemCount,
-                    key = movies.itemKey { it.imdbID}
-                ) {
-                    val item = movies[it]
-
-                    if (item != null)
-                        MovieItem(
-                            movie = item,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .clickable {
-                                    navController.navigate("movie/${item.imdbID}")
-                                }
-                        )
-                }
-                item {
-                  if (movies.loadState.append is LoadState.Loading)
-                      CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                }
-            }
-
-//            LazyVerticalGrid(
-//                columns = GridCells.Adaptive(minSize = 128.dp)
+//            LazyColumn(
+//                modifier = Modifier.fillMaxSize(),
+//                verticalArrangement = Arrangement.spacedBy(16.dp),
+//                horizontalAlignment = Alignment.CenterHorizontally
 //            ) {
 //                items(
 //                    count = movies.itemCount,
-//                    key = movies.itemKey { it.imdbID},
-//                    contentType = movies.itemContentType { it }
-//                ) { index ->
+//                    key = movies.itemKey { it.imdbID}
+//                ) {
+//                    val item = movies[it]
 //
-//                    val item = movies[index]
-//
-//                    item?.let {
-//                        MovieGridItem(
-//                            movie = it,
+//                    if (item != null)
+//                        MovieItem(
+//                            movie = item,
 //                            modifier = Modifier
 //                                .fillMaxSize()
 //                                .clickable {
-//                                    navController.navigate("movie/${it.imdbID}")
+//                                    navController.navigate("movie/${item.imdbID}")
 //                                }
 //                        )
-//                    }
 //                }
 //                item {
 //                  if (movies.loadState.append is LoadState.Loading)
 //                      CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
 //                }
 //            }
+
+            LazyVerticalGrid(
+                columns = GridCells.Adaptive(minSize = 128.dp)
+            ) {
+                items(
+                    count = movies.itemCount,
+                    key = movies.itemKey { it.imdbID},
+                    contentType = movies.itemContentType { it }
+                ) { index ->
+
+                    val item = movies[index]
+
+                    item?.let {
+                        MovieGridItem(
+                            movie = it,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clickable {
+                                    navController.navigate("movie/${it.imdbID}")
+                                }
+                        )
+                    }
+                }
+                item {
+                  if (movies.loadState.append is LoadState.Loading)
+                      CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                }
+            }
         }
     }
 
