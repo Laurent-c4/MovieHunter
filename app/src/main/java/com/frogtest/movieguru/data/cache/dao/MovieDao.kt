@@ -2,6 +2,8 @@ package com.frogtest.movieguru.data.cache.dao
 
 import androidx.paging.PagingSource
 import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Upsert
 import com.frogtest.movieguru.data.cache.entity.MovieEntity
@@ -9,11 +11,12 @@ import com.frogtest.movieguru.data.cache.entity.MovieEntity
 @Dao
 interface MovieDao {
 
-    @Upsert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(movies: List<MovieEntity>)
 
     // Select movies with release date greater that 2000
-    @Query("SELECT * FROM MovieEntity WHERE year > 2000"
+    @Query("SELECT * FROM MovieEntity"
+//            + " WHERE year > 2000"
 //            + " ORDER BY year ASC"
     )
     fun pagingSource(): PagingSource<Int, MovieEntity>

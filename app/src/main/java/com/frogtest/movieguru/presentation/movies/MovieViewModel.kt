@@ -7,16 +7,17 @@ import androidx.paging.cachedIn
 import androidx.paging.map
 import com.frogtest.movieguru.data.cache.entity.MovieEntity
 import com.frogtest.movieguru.data.mappers.toMovie
+import com.frogtest.movieguru.domain.repository.MovieRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 @HiltViewModel
 class MovieViewModel @Inject constructor(
-    pager: Pager<Int, MovieEntity>
+    repository: MovieRepository
 ): ViewModel() {
 
-    val moviePagingFlow = pager.flow.map { pagingData ->
+    val getMovies = repository.getMovies().map { pagingData ->
         pagingData.map { movieEntity ->
             movieEntity.toMovie()
         }

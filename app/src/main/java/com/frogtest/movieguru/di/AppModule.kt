@@ -8,11 +8,9 @@ import androidx.room.Room
 import com.frogtest.movieguru.MovieApp
 import com.frogtest.movieguru.data.cache.MovieDatabase
 import com.frogtest.movieguru.data.cache.entity.MovieEntity
-import com.frogtest.movieguru.data.network.api.OMDBMovieAPI
 import com.frogtest.movieguru.data.network.MovieNetworkMediator
+import com.frogtest.movieguru.data.network.api.OMDBMovieAPI
 import com.frogtest.movieguru.data.network.api.TMDBMovieAPI
-import com.frogtest.movieguru.data.repository.MovieRepositoryImpl
-import com.frogtest.movieguru.domain.repository.MovieRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -61,28 +59,5 @@ object AppModule {
             .build()
             .create(TMDBMovieAPI::class.java)
     }
-
-    @OptIn(ExperimentalPagingApi::class)
-    @Provides
-    @Singleton
-    fun provideMoviePager(movieDb:MovieDatabase, movieApi: OMDBMovieAPI): Pager<Int, MovieEntity> {
-        return Pager(
-            config = PagingConfig(
-                pageSize = 10,
-                enablePlaceholders = false
-            ),
-            remoteMediator = MovieNetworkMediator(movieApi, movieDb),
-            pagingSourceFactory = {
-                movieDb.movieDao.pagingSource()
-            }
-        )
-    }
-
-//    @Provides
-//    @Singleton
-//    fun provideMovieRepository(movieDb: MovieDatabase, movieApi: OMDBMovieAPI, movieApi2: TMDBMovieAPI): MovieRepository {
-//        return MovieRepositoryImpl(omDBApi = movieApi, tmDBApi = movieApi2, movieDatabase = movieDb)
-//    }
-
 
 }

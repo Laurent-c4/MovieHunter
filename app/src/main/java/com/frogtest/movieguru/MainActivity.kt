@@ -14,7 +14,10 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -139,7 +142,11 @@ class MainActivity : FragmentActivity() {
                       topBar =
                       {
                           if (currentDestination != "auth") {
-                              TopBar(currentDestination, showSettingsDialog)
+                              TopBar(currentDestination = currentDestination,
+                                  showSettingsDialog = showSettingsDialog,
+                                  onSearchClicked = {
+//                                      navController.navigate("search")
+                                  })
                           }
                       },
                   ) { paddingValues ->
@@ -154,12 +161,22 @@ class MainActivity : FragmentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
     private fun TopBar(
         currentDestination: String?,
-        showSettingsDialog: MutableState<Boolean>
+        showSettingsDialog: MutableState<Boolean>,
+        onSearchClicked: () -> Unit = {}
     ) {
         TopAppBar(
             title = { Text(text = "Movie Guru") },
             actions =
             {
+                if (currentDestination == "movies")
+                    IconButton(onClick = { onSearchClicked() })
+                    {
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = "Search",
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
                 if (currentDestination == "movies")
                     IconButton(onClick = { showSettingsDialog.value = true })
                     {
@@ -237,13 +254,11 @@ class MainActivity : FragmentActivity() {
             }
             composable("movies") {
                 val viewModel = hiltViewModel<MovieViewModel>()
-                val movies = viewModel.moviePagingFlow.collectAsLazyPagingItems()
-                MovieScreen(movies = movies, navController = navController)
+                MovieScreen(navController = navController, viewModel = viewModel)
             }
             composable("movie/{imdbID}") { backStackEntry ->
                 val imdbID = backStackEntry.arguments?.getString("imdbID")
                 val viewModel = hiltViewModel<MovieDetailsViewModel>()
-    //                              val movie = viewModel.getMovie(movieId = movieId ?: "")
                 MovieDetailsScreen(imdbID = imdbID ?: "", viewModel = viewModel)
             }
         }

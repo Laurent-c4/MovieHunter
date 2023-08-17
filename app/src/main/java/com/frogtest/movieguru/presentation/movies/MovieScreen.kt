@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
 import coil.compose.AsyncImage
 import com.frogtest.movieguru.domain.model.Movie
@@ -33,10 +34,12 @@ private const val TAG = "MovieScreen"
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun MovieScreen(
-    movies: LazyPagingItems<Movie>,
-    navController: NavController
+    navController: NavController,
+    viewModel: MovieViewModel
 ) {
     val context = LocalContext.current
+
+    val movies = viewModel.getMovies.collectAsLazyPagingItems()
     
     LaunchedEffect(key1 = movies.loadState) {
         if(movies.loadState.refresh is LoadState.Error) {
@@ -78,16 +81,19 @@ fun MovieScreen(
                 columns = GridCells.Adaptive(minSize = 128.dp)
             ) {
                 items(
-                    movies.itemCount
+                    count = movies.itemCount,
+                    key = { index -> movies[index]?.imdbID ?: index }
                 ) { index ->
-                    MovieGridItem(
-                        movie = movies[index]!!,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .clickable {
-                                navController.navigate("movie/${movies[index]?.imdbID}")
-                            }
-                    )
+                    movies[index]?.let {
+                        MovieGridItem(
+                            movie = it,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clickable {
+                                    navController.navigate("movie/${it.imdbID}")
+                                }
+                        )
+                    }
                 }
                 item {
                   if (movies.loadState.append is LoadState.Loading)
