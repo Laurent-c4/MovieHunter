@@ -47,9 +47,9 @@ class MovieNetworkMediator @Inject constructor(
                         ?: return MediatorResult.Success(
                             endOfPaginationReached = remoteKeys != null
                         )
+                        Log.d(TAG, "load: nextPage: $nextPage")
                     nextPage
 
-                    Log.d(TAG, "load: nextPage: $nextPage")
                 }
             }
 
