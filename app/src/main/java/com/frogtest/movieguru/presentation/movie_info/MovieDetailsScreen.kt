@@ -47,128 +47,132 @@ fun MovieDetailsScreen(
 
     val state = viewModel.state
     if (state.error == null) {
-        LazyColumn(
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            state.movieDetails?.let { movieDetails ->
-                item {
-                    movieDetails.poster?.let { AsyncImage(
-                        model = it,
-                        contentDescription = "Poster",
-                        modifier = Modifier
-                            .height(250.dp)
-                    ) }
-                }
 
-                item {
-                    Divider(Modifier.padding(top = 8.dp, bottom = 16.dp))
-                }
-
-                item {movieDetails.title?.let { Text(
-                    text = it,
-                    style = MaterialTheme.typography.titleLarge,
-                ) }  }
-
-                item{
-                    Spacer(modifier = Modifier.padding(8.dp))
-                }
-
-                item{
-                    movieDetails.plot?.let { Text(text = it, Modifier.padding(start = 8.dp, end = 8.dp)) }
-                }
-
-                item{
-                    Spacer(modifier = Modifier.padding(8.dp))
-                }
-
-                item{
-                    movieDetails.imdbRating?.let{
-                        Text(text = "IMDB Rating: $it", Modifier.padding(start = 8.dp, end = 8.dp))
+        Column(Modifier.fillMaxSize()) {
+            LazyColumn(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.weight(1f)
+            ) {
+                state.movieDetails?.let { movieDetails ->
+                    item {
+                        movieDetails.poster?.let { AsyncImage(
+                            model = it,
+                            contentDescription = "Poster",
+                            modifier = Modifier
+                                .height(250.dp)
+                        ) }
                     }
-                }
 
-                item{
-                    Spacer(modifier = Modifier.padding(8.dp))
-                }
-
-                item{
-                    movieDetails.released?.let{
-                        Text(text = "Released: $it", Modifier.padding(start = 8.dp, end = 8.dp))
+                    item {
+                        Divider(Modifier.padding(top = 8.dp, bottom = 16.dp))
                     }
-                }
 
-                item{
-                    Spacer(modifier = Modifier.padding(8.dp))
-                }
+                    item {movieDetails.title?.let { Text(
+                        text = it,
+                        style = MaterialTheme.typography.titleLarge,
+                    ) }  }
 
-                item{
-                    movieDetails.actors?.let{
-                        Text(text = "Cast: $it", Modifier.padding(start = 8.dp, end = 8.dp))
+                    item{
+                        Spacer(modifier = Modifier.padding(8.dp))
                     }
-                }
 
-                item{
-                    Divider(Modifier.padding(top = 16.dp, bottom = 8.dp))
-                }
-            }
+                    item{
+                        movieDetails.plot?.let { Text(text = it, Modifier.padding(start = 8.dp, end = 8.dp)) }
+                    }
 
-        }
+                    item{
+                        Spacer(modifier = Modifier.padding(8.dp))
+                    }
 
-        Column(
-            modifier = Modifier.fillMaxHeight(1f),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Bottom
-        ) {
+                    item{
+                        movieDetails.imdbRating?.let{
+                            Text(text = "IMDB Rating: $it", Modifier.padding(start = 8.dp, end = 8.dp))
+                        }
+                    }
 
-            val ytVideos = state.movieVideos.filter { it.site == "YouTube" }
+                    item{
+                        Spacer(modifier = Modifier.padding(8.dp))
+                    }
 
-            Box {
+                    item{
+                        movieDetails.released?.let{
+                            Text(text = "Released: $it", Modifier.padding(start = 8.dp, end = 8.dp))
+                        }
+                    }
 
-                HorizontalPager(
-                    pageCount = ytVideos.size,
-                    state = pagerState,
-                    key = {ytVideos[it].key!!}
-                ) { index ->
-                    YoutubePlayer(youtubeVideoID = ytVideos[index].key!!)
+                    item{
+                        Spacer(modifier = Modifier.padding(8.dp))
+                    }
+
+                    item{
+                        movieDetails.actors?.let{
+                            Text(text = "Cast: $it", Modifier.padding(start = 8.dp, end = 8.dp))
+                        }
+                    }
+
+                    item{
+                        Divider(Modifier.padding(top = 16.dp, bottom = 8.dp))
+                    }
                 }
 
             }
 
-            if(ytVideos.size > 1) {
-                Box(modifier = Modifier
-                    .offset(y = -(16).dp)
-                    .fillMaxWidth(0.5f)
-                    .clip(RoundedCornerShape(100))
-                    .background(MaterialTheme.colorScheme.background)
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Bottom
+            ) {
+
+                val ytVideos = state.movieVideos.filter { it.site == "YouTube" }
+
+                Box {
+
+                    HorizontalPager(
+                        pageCount = ytVideos.size,
+                        state = pagerState,
+                        key = {ytVideos[it].key!!}
+                    ) { index ->
+                        YoutubePlayer(youtubeVideoID = ytVideos[index].key!!)
+                    }
+
+                }
+
+                if(ytVideos.size > 1) {
+                    Box(modifier = Modifier
+                        .offset(y = -(16).dp)
+                        .fillMaxWidth(0.5f)
+                        .clip(RoundedCornerShape(100))
+                        .background(MaterialTheme.colorScheme.background)
 //                    .padding(8.dp)
-                    .align(Alignment.CenterHorizontally)
-                )
-                {
-                    IconButton(
-                        onClick = {
-                            scope.launch {
-                                pagerState.animateScrollToPage(pagerState.currentPage - 1)
-                            }
-                        },
-                        modifier = Modifier.align(Alignment.CenterStart)
-                    ) {
-                        Icon(imageVector = Icons.Default.KeyboardArrowLeft, contentDescription = "Previous")
-                    }
+                        .align(Alignment.CenterHorizontally)
+                    )
+                    {
+                        IconButton(
+                            onClick = {
+                                scope.launch {
+                                    pagerState.animateScrollToPage(pagerState.currentPage - 1)
+                                }
+                            },
+                            modifier = Modifier.align(Alignment.CenterStart)
+                        ) {
+                            Icon(imageVector = Icons.Default.KeyboardArrowLeft, contentDescription = "Previous")
+                        }
 
-                    IconButton(
-                        onClick = {
-                            scope.launch {
-                                pagerState.animateScrollToPage(pagerState.currentPage + 1)
-                            }
-                        },
-                        modifier = Modifier.align(Alignment.CenterEnd)
-                    ) {
-                        Icon(imageVector = Icons.Default.KeyboardArrowRight, contentDescription = "Next")
+                        IconButton(
+                            onClick = {
+                                scope.launch {
+                                    pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                                }
+                            },
+                            modifier = Modifier.align(Alignment.CenterEnd)
+                        ) {
+                            Icon(imageVector = Icons.Default.KeyboardArrowRight, contentDescription = "Next")
+                        }
                     }
                 }
-            }
 
+            }
         }
+
     }
 
     Box(
