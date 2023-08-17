@@ -24,9 +24,9 @@ import androidx.navigation.NavController
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.compose.items
-import coil.compose.AsyncImage
-import com.frogtest.movieguru.domain.model.Movie
+import androidx.paging.compose.itemContentType
+import androidx.paging.compose.itemKey
+
 
 
 private const val TAG = "MovieScreen"
@@ -55,14 +55,46 @@ fun MovieScreen(
             CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
         }
         else {
-//            LazyColumn(
-//                modifier = Modifier.fillMaxSize(),
-//                verticalArrangement = Arrangement.spacedBy(16.dp),
-//                horizontalAlignment = Alignment.CenterHorizontally
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                items(
+                    count = movies.itemCount,
+                    key = movies.itemKey { it.imdbID}
+                ) {
+                    val item = movies[it]
+
+                    if (item != null)
+                        MovieItem(
+                            movie = item,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clickable {
+                                    navController.navigate("movie/${item.imdbID}")
+                                }
+                        )
+                }
+                item {
+                  if (movies.loadState.append is LoadState.Loading)
+                      CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                }
+            }
+
+//            LazyVerticalGrid(
+//                columns = GridCells.Adaptive(minSize = 128.dp)
 //            ) {
-//                items(movies) {
-//                    if (it != null)
-//                        MovieItem(
+//                items(
+//                    count = movies.itemCount,
+//                    key = movies.itemKey { it.imdbID},
+//                    contentType = movies.itemContentType { it }
+//                ) { index ->
+//
+//                    val item = movies[index]
+//
+//                    item?.let {
+//                        MovieGridItem(
 //                            movie = it,
 //                            modifier = Modifier
 //                                .fillMaxSize()
@@ -70,36 +102,13 @@ fun MovieScreen(
 //                                    navController.navigate("movie/${it.imdbID}")
 //                                }
 //                        )
+//                    }
 //                }
 //                item {
 //                  if (movies.loadState.append is LoadState.Loading)
 //                      CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
 //                }
 //            }
-
-            LazyVerticalGrid(
-                columns = GridCells.Adaptive(minSize = 128.dp)
-            ) {
-                items(
-                    count = movies.itemCount,
-                    key = { index -> movies[index]?.imdbID ?: index }
-                ) { index ->
-                    movies[index]?.let {
-                        MovieGridItem(
-                            movie = it,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .clickable {
-                                    navController.navigate("movie/${it.imdbID}")
-                                }
-                        )
-                    }
-                }
-                item {
-                  if (movies.loadState.append is LoadState.Loading)
-                      CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                }
-            }
         }
     }
 

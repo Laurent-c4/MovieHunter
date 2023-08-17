@@ -5,7 +5,6 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import androidx.room.Upsert
 import com.frogtest.movieguru.data.cache.entity.MovieEntity
 
 @Dao
@@ -19,7 +18,7 @@ interface MovieDao {
 //            + " WHERE year > 2000"
 //            + " ORDER BY year ASC"
     )
-    fun pagingSource(): PagingSource<Int, MovieEntity>
+    fun getMovies(): PagingSource<Int, MovieEntity>
 
    //Get item count
     @Query("SELECT COUNT(*) FROM MovieEntity")

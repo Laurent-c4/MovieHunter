@@ -1,5 +1,6 @@
 package com.frogtest.movieguru.data.network
 
+import android.util.Log
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
@@ -47,6 +48,8 @@ class MovieNetworkMediator @Inject constructor(
                             endOfPaginationReached = remoteKeys != null
                         )
                     nextPage
+
+                    Log.d(TAG, "load: nextPage: $nextPage")
                 }
             }
 

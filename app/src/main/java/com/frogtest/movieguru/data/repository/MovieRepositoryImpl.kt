@@ -14,7 +14,6 @@ import com.frogtest.movieguru.data.mappers.toMovieVideoEntity
 import com.frogtest.movieguru.data.network.MovieNetworkMediator
 import com.frogtest.movieguru.data.network.api.OMDBMovieAPI
 import com.frogtest.movieguru.data.network.api.TMDBMovieAPI
-import com.frogtest.movieguru.domain.model.Movie
 import com.frogtest.movieguru.domain.model.MovieDetails
 import com.frogtest.movieguru.domain.model.MovieVideo
 import com.frogtest.movieguru.domain.repository.MovieRepository
@@ -36,7 +35,7 @@ import javax.inject.Singleton
 
     @OptIn(ExperimentalPagingApi::class)
     override fun getMovies(): Flow<PagingData<MovieEntity>> {
-        val pagingSourceFactory = { movieDatabase.movieDao.pagingSource() }
+        val pagingSourceFactory = { movieDatabase.movieDao.getMovies() }
         return Pager(
             config = PagingConfig(pageSize = 10),
             remoteMediator = MovieNetworkMediator(

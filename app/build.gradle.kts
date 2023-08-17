@@ -83,8 +83,8 @@ dependencies {
     implementation ("androidx.hilt:hilt-navigation-compose:1.0.0")
 
     // Paging
-    implementation ("androidx.paging:paging-runtime-ktx:3.1.1")
-    implementation ("androidx.paging:paging-compose:1.0.0-alpha18")
+    implementation ("androidx.paging:paging-runtime-ktx:3.2.0")
+    implementation ("androidx.paging:paging-compose:3.2.0")
 
     // Retrofit
     implementation ("com.squareup.retrofit2:retrofit:2.9.0")
@@ -94,7 +94,7 @@ dependencies {
     // Room
     implementation ("androidx.room:room-ktx:2.5.1")
     kapt ("androidx.room:room-compiler:2.5.1")
-    implementation ("androidx.room:room-paging:2.5.1")
+    implementation ("androidx.room:room-paging:2.5.2")
 
     // Firebase Auth
     implementation ("com.google.firebase:firebase-auth-ktx:21.1.0")
