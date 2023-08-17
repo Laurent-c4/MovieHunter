@@ -40,7 +40,8 @@ fun MovieGridItem(
             ) {
                 Text(
                     text = movie.title,
-                    style = MaterialTheme.typography.titleMedium
+                    style = MaterialTheme.typography.titleMedium,
+                    maxLines = 3,
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
