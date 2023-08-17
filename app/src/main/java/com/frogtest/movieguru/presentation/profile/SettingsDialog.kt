@@ -103,9 +103,9 @@ fun SettingsDialog(
 
                 Divider(Modifier.padding(top = 8.dp))
 
-                FingerprintSwitch(useFingerprint, onToggleFingerprint)
-
-                Divider(Modifier.padding(top = 8.dp))
+//                FingerprintSwitch(useFingerprint, onToggleFingerprint)
+//
+//                Divider(Modifier.padding(top = 8.dp))
 
 
                 LinksPanel()
