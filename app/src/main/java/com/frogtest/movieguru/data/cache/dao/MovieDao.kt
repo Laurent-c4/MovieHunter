@@ -13,7 +13,9 @@ interface MovieDao {
     suspend fun insertAll(movies: List<MovieEntity>)
 
     // Select movies with release date greater that 2000
-    @Query("SELECT * FROM MovieEntity WHERE year > 2000 ORDER BY year ASC")
+    @Query("SELECT * FROM MovieEntity WHERE year > 2000"
+//            + " ORDER BY year ASC"
+    )
     fun pagingSource(): PagingSource<Int, MovieEntity>
 
    //Get item count

@@ -1,4 +1,4 @@
-package com.sabasi.mobile.datastore
+package com.frogtest.movieguru.preferences
 
 import android.content.Context
 import androidx.compose.runtime.mutableStateOf

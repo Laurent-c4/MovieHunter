@@ -112,7 +112,8 @@ dependencies {
     // Youtube Player
     implementation ("com.pierfrancescosoffritti.androidyoutubeplayer:core:12.1.0")
 
-
+    // Splash Screen
+    implementation ("androidx.core:core-splashscreen:1.0.1")
 
 
 }
