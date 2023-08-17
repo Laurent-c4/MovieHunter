@@ -1,4 +1,4 @@
-package com.frogtest.movieguru.data.cache
+package com.frogtest.movieguru.data.cache.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

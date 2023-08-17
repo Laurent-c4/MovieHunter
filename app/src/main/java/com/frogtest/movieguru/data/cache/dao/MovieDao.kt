@@ -1,9 +1,10 @@
-package com.frogtest.movieguru.data.cache
+package com.frogtest.movieguru.data.cache.dao
 
 import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Upsert
+import com.frogtest.movieguru.data.cache.entity.MovieEntity
 
 @Dao
 interface MovieDao {

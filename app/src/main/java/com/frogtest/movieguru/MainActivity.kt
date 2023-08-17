@@ -47,6 +47,8 @@ import coil.compose.AsyncImage
 import com.frogtest.movieguru.presentation.auth.GoogleAuthUIClient
 import com.frogtest.movieguru.presentation.auth.SignInScreen
 import com.frogtest.movieguru.presentation.auth.SignInViewModel
+import com.frogtest.movieguru.presentation.movie_info.MovieDetailsScreen
+import com.frogtest.movieguru.presentation.movie_info.MovieDetailsViewModel
 import com.frogtest.movieguru.presentation.movies.MovieScreen
 import com.frogtest.movieguru.presentation.movies.MovieViewModel
 import com.frogtest.movieguru.presentation.profile.ProfileScreen
@@ -219,7 +221,13 @@ class MainActivity : FragmentActivity() {
                           composable("movies") {
                               val viewModel = hiltViewModel<MovieViewModel>()
                               val movies = viewModel.moviePagingFlow.collectAsLazyPagingItems()
-                              MovieScreen(movies = movies )
+                              MovieScreen(movies = movies, navController = navController )
+                          }
+                          composable("movie/{imdbID}") { backStackEntry ->
+                              val imdbID = backStackEntry.arguments?.getString("imdbID")
+                              val viewModel = hiltViewModel<MovieDetailsViewModel>()
+//                              val movie = viewModel.getMovie(movieId = movieId ?: "")
+                              MovieDetailsScreen(imdbID = imdbID ?: "", viewModel = viewModel )
                           }
                       }
                   }

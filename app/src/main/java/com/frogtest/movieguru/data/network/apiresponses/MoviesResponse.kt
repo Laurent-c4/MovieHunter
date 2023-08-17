@@ -1,8 +1,9 @@
-package com.frogtest.movieguru.data.network
+package com.frogtest.movieguru.data.network.apiresponses
 
+import com.frogtest.movieguru.data.network.dto.MovieDto
 import com.squareup.moshi.Json
 
-data class MovieResponse(
+data class MoviesResponse(
     @field:Json(name = "Search")
     val data: List<MovieDto>,
     @field:Json(name = "totalResults")

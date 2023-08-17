@@ -7,8 +7,9 @@ import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import androidx.room.withTransaction
 import com.frogtest.movieguru.data.cache.MovieDatabase
-import com.frogtest.movieguru.data.cache.MovieEntity
+import com.frogtest.movieguru.data.cache.entity.MovieEntity
 import com.frogtest.movieguru.data.mappers.toMovieEntity
+import com.frogtest.movieguru.data.network.api.OMDBMovieAPI
 import kotlinx.coroutines.delay
 import retrofit2.HttpException
 import java.io.IOException
@@ -17,7 +18,7 @@ private const val TAG = "MovieNetworkMediator"
 
 @OptIn(ExperimentalPagingApi::class)
 class MovieNetworkMediator(
-    private val movieApi: MovieAPI,
+    private val OMDBMovieApi: OMDBMovieAPI,
     private val movieDb: MovieDatabase
 ): RemoteMediator<Int, MovieEntity>() {
     override suspend fun load(
@@ -41,8 +42,8 @@ class MovieNetworkMediator(
                 }
             }
 
-            delay(2000L)
-            val call = movieApi.getMovies(page = loadKey)
+//            delay(2000L)
+            val call = OMDBMovieApi.getMovies(page = loadKey)
             val movies = call.data
             Log.d(TAG, "load: ${movies.size} items loaded, in page $loadKey")
             movieDb.withTransaction {

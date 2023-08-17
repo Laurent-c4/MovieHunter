@@ -1,4 +1,4 @@
-package com.frogtest.movieguru.data.network
+package com.frogtest.movieguru.data.network.dto
 
 import com.squareup.moshi.Json
 

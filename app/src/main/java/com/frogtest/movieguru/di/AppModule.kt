@@ -7,9 +7,12 @@ import androidx.paging.PagingConfig
 import androidx.room.Room
 import com.frogtest.movieguru.MovieApp
 import com.frogtest.movieguru.data.cache.MovieDatabase
-import com.frogtest.movieguru.data.cache.MovieEntity
-import com.frogtest.movieguru.data.network.MovieAPI
+import com.frogtest.movieguru.data.cache.entity.MovieEntity
+import com.frogtest.movieguru.data.network.api.OMDBMovieAPI
 import com.frogtest.movieguru.data.network.MovieNetworkMediator
+import com.frogtest.movieguru.data.network.api.TMDBMovieAPI
+import com.frogtest.movieguru.data.repository.MovieRepositoryImpl
+import com.frogtest.movieguru.domain.repository.MovieRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -41,18 +44,28 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideMovieApi(): MovieAPI {
+    fun provideMovieApi(): OMDBMovieAPI {
         return Retrofit.Builder()
-            .baseUrl(MovieAPI.BASE_URL)
+            .baseUrl(OMDBMovieAPI.BASE_URL)
             .addConverterFactory(MoshiConverterFactory.create())
             .build()
-            .create(MovieAPI::class.java)
+            .create(OMDBMovieAPI::class.java)
+    }
+
+    @Provides
+    @Singleton
+        fun provideMovieApi2(): TMDBMovieAPI {
+        return Retrofit.Builder()
+            .baseUrl(TMDBMovieAPI.BASE_URL)
+            .addConverterFactory(MoshiConverterFactory.create())
+            .build()
+            .create(TMDBMovieAPI::class.java)
     }
 
     @OptIn(ExperimentalPagingApi::class)
     @Provides
     @Singleton
-    fun provideMoviePager(movieDb:MovieDatabase, movieApi: MovieAPI): Pager<Int, MovieEntity> {
+    fun provideMoviePager(movieDb:MovieDatabase, movieApi: OMDBMovieAPI): Pager<Int, MovieEntity> {
         return Pager(
             config = PagingConfig(
                 pageSize = 10,
@@ -64,6 +77,12 @@ object AppModule {
             }
         )
     }
+
+//    @Provides
+//    @Singleton
+//    fun provideMovieRepository(movieDb: MovieDatabase, movieApi: OMDBMovieAPI, movieApi2: TMDBMovieAPI): MovieRepository {
+//        return MovieRepositoryImpl(omDBApi = movieApi, tmDBApi = movieApi2, movieDatabase = movieDb)
+//    }
 
 
 }

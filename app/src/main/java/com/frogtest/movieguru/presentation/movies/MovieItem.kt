@@ -15,7 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.frogtest.movieguru.data.domain.Movie
+import com.frogtest.movieguru.domain.model.Movie
 import com.frogtest.movieguru.ui.theme.MovieGuruTheme
 
 @Composable

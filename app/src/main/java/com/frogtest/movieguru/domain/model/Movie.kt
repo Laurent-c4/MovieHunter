@@ -1,4 +1,4 @@
-package com.frogtest.movieguru.data.domain
+package com.frogtest.movieguru.domain.model
 
 data class Movie(
     val imdbID: String,
