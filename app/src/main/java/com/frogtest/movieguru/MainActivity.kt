@@ -168,16 +168,18 @@ class MainActivity : FragmentActivity() {
             title = { Text(text = "Movie Guru") },
             actions =
             {
-                if (currentDestination == "movies")
-                    IconButton(onClick = { onSearchClicked() })
-                    {
-                        Icon(
-                            imageVector = Icons.Default.Search,
-                            contentDescription = "Search",
-                            tint = MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-                if (currentDestination == "movies")
+                if (currentDestination == "movies") {
+
+                    // TODO:  Implement search
+//                    IconButton(onClick = { onSearchClicked() })
+//                    {
+//                        Icon(
+//                            imageVector = Icons.Default.Search,
+//                            contentDescription = "Search",
+//                            tint = MaterialTheme.colorScheme.onSurface
+//                        )
+//                    }
+
                     IconButton(onClick = { showSettingsDialog.value = true })
                     {
                         AsyncImage(
@@ -188,6 +190,8 @@ class MainActivity : FragmentActivity() {
                             contentScale = ContentScale.Crop,
                         )
                     }
+
+                }
             }
         )
     }
