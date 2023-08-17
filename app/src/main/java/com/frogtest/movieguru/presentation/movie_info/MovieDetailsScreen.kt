@@ -31,7 +31,9 @@ fun MovieDetailsScreen(
             }
 
             state.movieVideos.forEach { movieVideo ->
-                movieVideo.name?.let { Text(text = it) }
+                if (movieVideo.site == "YouTube") {
+                    movieVideo.key?.let { YoutubePlayer(youtubeVideoID = it) }
+                }
             }
 
         }
