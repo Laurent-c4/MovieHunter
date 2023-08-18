@@ -172,4 +172,4 @@ private fun TextLink(text: String, url: String) {
     )
 }
 
-private const val FEEDBACK_URL = "https://goo.gle/nia-app-feedback"
+private const val FEEDBACK_URL = "https://github.com/Laurent-c4/MovieGuru/issues"
