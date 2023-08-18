@@ -27,7 +27,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -113,7 +112,7 @@ class MainActivity : FragmentActivity() {
                     val currentDestination = navBackStackEntry?.destination?.route
 
                     val biometricsInitialised = remember { mutableStateOf(false) }
-                    val useFingerprint = settingsDataStore.useFingerprint.value
+                    val useGrid = settingsDataStore.useGrid.value
                     if (!biometricsInitialised.value) {
                         initBiometrics(navController)
                         biometricsInitialised.value = true
@@ -134,10 +133,10 @@ class MainActivity : FragmentActivity() {
 
                                 showSettingsDialog.value = false
                             },
-                            onToggleFingerprint = {
-                                settingsDataStore.toggleUseFingerprint()
+                            onToggleUseGrid = {
+                                settingsDataStore.toggleUseGrid()
                             },
-                            useFingerprint = useFingerprint
+                            useGrid = useGrid
                         )
                   }
 
@@ -154,7 +153,7 @@ class MainActivity : FragmentActivity() {
                           }
                       },
                   ) { paddingValues ->
-                      NavSetUp(navController, paddingValues, useFingerprint)
+                      NavSetUp(navController, paddingValues)
 
                   }
 
@@ -210,7 +209,7 @@ class MainActivity : FragmentActivity() {
     private fun NavSetUp(
         navController: NavHostController,
         paddingValues: PaddingValues,
-        useFingerprint: Boolean
+        useGrid: Boolean = settingsDataStore.useGrid.value
     ) {
         NavHost(
             navController = navController,
@@ -227,7 +226,7 @@ class MainActivity : FragmentActivity() {
                 LaunchedEffect(key1 = Unit) {
                     if (googleAuthUIClient.getSignedInUser() !== null) {
                         if (viewModel.isEmailVerified) {
-                            checkBiometricsAndNavigate(useFingerprint, navController)
+                            checkBiometricsAndNavigate(navController = navController)
                         } else {
                             navController.navigate(Screen.VerifyEmailScreen.route) {
                                 popUpTo(navController.graph.id) { inclusive = true }
@@ -254,7 +253,7 @@ class MainActivity : FragmentActivity() {
                 LaunchedEffect(key1 = state.isSignInSuccessful) {
                     if (state.isSignInSuccessful) {
                         if (viewModel.isEmailVerified) {
-                            checkBiometricsAndNavigate(useFingerprint, navController)
+                            checkBiometricsAndNavigate(navController =  navController)
                             viewModel.resetState()
                         } else {
                             navController.navigate(Screen.VerifyEmailScreen.route) {
@@ -295,7 +294,7 @@ class MainActivity : FragmentActivity() {
             }
             composable(Screen.MovieScreen.route) {
                 val viewModel = hiltViewModel<MovieViewModel>()
-                MovieScreen(navController = navController, viewModel = viewModel)
+                MovieScreen(navController = navController, viewModel = viewModel, useGrid = useGrid)
             }
             composable("movie/{imdbID}") { backStackEntry ->
                 val imdbID = backStackEntry.arguments?.getString("imdbID")
@@ -355,10 +354,10 @@ class MainActivity : FragmentActivity() {
     }
 
     private fun checkBiometricsAndNavigate(
-        useFingerprint: Boolean,
+        useFingerprint: Boolean = true,
         navController: NavHostController
     ) {
-        if (true) {
+        if (useFingerprint) {
             biometricPrompt.authenticate(promptInfo)
         } else {
             navController.navigate(Screen.MovieScreen.route) {

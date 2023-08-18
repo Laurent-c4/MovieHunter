@@ -6,4 +6,6 @@
     <string name="settings_title">Profile</string>
     <string name="sign_out_button_text">Sign Out</string>
     <string name="use_fingerprint">Unlock with fingerprint</string>
+    <string name="use_grid">Movie Listing View</string>
+
 </resources>

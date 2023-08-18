@@ -35,7 +35,8 @@ private const val TAG = "MovieScreen"
 @Composable
 fun MovieScreen(
     navController: NavController,
-    viewModel: MovieViewModel
+    viewModel: MovieViewModel,
+    useGrid: Boolean = true,
 ) {
     val context = LocalContext.current
 
@@ -55,32 +56,8 @@ fun MovieScreen(
             CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
         }
         else {
-//            LazyColumn(
-//                modifier = Modifier.fillMaxSize(),
-//                verticalArrangement = Arrangement.spacedBy(16.dp),
-//                horizontalAlignment = Alignment.CenterHorizontally
-//            ) {
-//                items(
-//                    count = movies.itemCount,
-//                    key = movies.itemKey { it.imdbID}
-//                ) {
-//                    val item = movies[it]
-//
-//                    if (item != null)
-//                        MovieItem(
-//                            movie = item,
-//                            modifier = Modifier
-//                                .fillMaxSize()
-//                                .clickable {
-//                                    navController.navigate("movie/${item.imdbID}")
-//                                }
-//                        )
-//                }
-//                item {
-//                  if (movies.loadState.append is LoadState.Loading)
-//                      CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-//                }
-//            }
+
+            if(useGrid)
 
             LazyVerticalGrid(
                 columns = GridCells.Adaptive(minSize = 128.dp)
@@ -109,6 +86,34 @@ fun MovieScreen(
                       CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
             }
+
+            else
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    items(
+                        count = movies.itemCount,
+                        key = movies.itemKey { it.imdbID}
+                    ) {
+                        val item = movies[it]
+
+                        if (item != null)
+                            MovieItem(
+                                movie = item,
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .clickable {
+                                        navController.navigate("movie/${item.imdbID}")
+                                    }
+                            )
+                    }
+                    item {
+                        if (movies.loadState.append is LoadState.Loading)
+                            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                    }
+                }
         }
     }
 

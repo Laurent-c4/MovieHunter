@@ -30,27 +30,27 @@ constructor(app: MovieApp) {
         observeDataStore()
     }
 
-    val useFingerprint = mutableStateOf(false)
+    val useGrid = mutableStateOf(true)
 
-    fun toggleUseFingerprint() {
+    fun toggleUseGrid() {
         scope.launch {
             datastore.edit { preferences ->
-                val current = preferences[USE_FINGERPRINT] ?: false
-                preferences[USE_FINGERPRINT] = !current
+                val current = preferences[USE_GRID] ?: false
+                preferences[USE_GRID] = !current
             }
         }
     }
 
     private fun observeDataStore() {
         datastore.data.onEach { preferences ->
-            preferences[USE_FINGERPRINT]?.let { useFingerprint ->
-                this.useFingerprint.value = useFingerprint
+            preferences[USE_GRID]?.let { useFingerprint ->
+                this.useGrid.value = useFingerprint
             }
         }.launchIn(scope)
     }
 
     companion object {
-        private val USE_FINGERPRINT = booleanPreferencesKey("use_fingerprint_key")
+        private val USE_GRID = booleanPreferencesKey("use_grid_key")
 
     }
 }

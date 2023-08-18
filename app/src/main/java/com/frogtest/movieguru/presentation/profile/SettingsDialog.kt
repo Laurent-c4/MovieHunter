@@ -27,11 +27,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -54,8 +56,8 @@ fun SettingsDialog(
     userData: UserData?,
     onDismiss: () -> Unit,
     onSignOut: () -> Unit,
-    onToggleFingerprint: () -> Unit,
-    useFingerprint: Boolean = false,
+    onToggleUseGrid: () -> Unit,
+    useGrid: Boolean = false,
     //    viewModel: SettingsViewModel = hiltViewModel(),
 ) {
     val configuration = LocalConfiguration.current
@@ -101,9 +103,11 @@ fun SettingsDialog(
 
                 Divider(Modifier.padding(top = 8.dp))
 
-//                FingerprintSwitch(useFingerprint, onToggleFingerprint)
-//
-//                Divider(Modifier.padding(top = 8.dp))
+//                FingerprintSwitch(useFingerprint = useFingerprint, onToggleFingerprint = onToggleFingerprint)
+
+                ToggleListView(useGrid = useGrid, onToggleUseGrid = onToggleUseGrid)
+
+                Divider(Modifier.padding(top = 8.dp))
 
 
                 LinksPanel()
@@ -132,6 +136,42 @@ private fun FingerprintSwitch(useFingerprint: Boolean, onToggleFingerprint: () -
 }
 
 @Composable
+fun ToggleListView(useGrid: Boolean, onToggleUseGrid: () -> Unit) {
+    val radioOptions = listOf("Grid", "List")
+
+    Text(text = stringResource(R.string.use_grid),
+        style = MaterialTheme.typography.labelLarge,
+        modifier = Modifier.padding(top = 16.dp)
+    )
+
+    Column {
+        radioOptions.forEach { text ->
+            Row( verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .selectable(
+                        selected = ((text == "Grid" && useGrid) || (text == "List" && !useGrid)),
+                        onClick = {
+                            onToggleUseGrid()
+                        }
+                    )
+//                    .padding(horizontal = 16.dp)
+            ) {
+                RadioButton(
+                    selected = ((text == "Grid" && useGrid) || (text == "List" && !useGrid)),
+                    onClick = { onToggleUseGrid() }
+                )
+                Text(
+                    text = text,
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.padding(start = 16.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
 private fun LinksPanel() {
     Row(
         modifier = Modifier.padding(top = 16.dp),
@@ -141,11 +181,6 @@ private fun LinksPanel() {
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Row {
-//                TextLink(
-//                    text = stringResource(string.brand_guidelines),
-//                    url = BRAND_GUIDELINES_URL,
-//                )
-//                Spacer(Modifier.width(16.dp))
                 TextLink(
                     text = stringResource(R.string.feedback),
                     url = FEEDBACK_URL,
