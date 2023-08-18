@@ -30,8 +30,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Divider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Switch
@@ -77,12 +80,22 @@ fun SettingsDialog(
                 Row {
                     if (userData?.photoUrl != null) {
                         AsyncImage(
-                            model = userData?.photoUrl,
+                            model = userData.photoUrl,
                             contentDescription = "Pic",
                             modifier = Modifier
                                 .size(48.dp)
                                 .clip(shape = CircleShape),
                             contentScale = ContentScale.Crop
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.AccountCircle,
+                            contentDescription = "Profile",
+                            tint = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier
+                                .size(48.dp)
+//                                .clip(shape = CircleShape)
+                                .align(Alignment.CenterVertically)
                         )
                     }
                     Column(
