@@ -12,6 +12,9 @@ interface MovieRemoteKeyDao {
     @Query("SELECT * FROM MovieRemoteKeyEntity WHERE id = :id")
     suspend fun getRemoteKey(id: String): MovieRemoteKeyEntity
 
+    @Query("SELECT * FROM MovieRemoteKeyEntity")
+    suspend fun getAllRemoteKeys(): List<MovieRemoteKeyEntity>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun addAllRemoteKeys(remoteKeys: List<MovieRemoteKeyEntity>)
 

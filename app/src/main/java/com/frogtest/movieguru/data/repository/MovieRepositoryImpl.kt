@@ -34,13 +34,14 @@ import javax.inject.Singleton
     private val TAG = "MovieRepositoryImpl"
 
     @OptIn(ExperimentalPagingApi::class)
-    override fun getMovies(): Flow<PagingData<MovieEntity>> {
-        val pagingSourceFactory = { movieDatabase.movieDao.getMovies() }
+    override fun getMovies(sort: Boolean): Flow<PagingData<MovieEntity>> {
+        val pagingSourceFactory = if (sort){ {movieDatabase.movieDao.getSortedMovies()} } else { {movieDatabase.movieDao.getMovies()} }
         return Pager(
             config = PagingConfig(pageSize = 10),
             remoteMediator = MovieNetworkMediator(
                 OMDBMovieApi = omDBApi,
-                movieDb = movieDatabase
+                movieDb = movieDatabase,
+                sort = sort
             ),
             pagingSourceFactory = pagingSourceFactory
         ).flow

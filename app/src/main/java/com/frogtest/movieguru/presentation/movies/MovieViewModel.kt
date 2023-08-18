@@ -17,7 +17,7 @@ class MovieViewModel @Inject constructor(
     repository: MovieRepository
 ): ViewModel() {
 
-    val getMovies = repository.getMovies().map { pagingData ->
+    val getMovies = repository.getMovies(sort = false).map { pagingData ->
         pagingData.map { movieEntity ->
             movieEntity.toMovie()
         }

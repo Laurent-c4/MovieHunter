@@ -11,6 +11,7 @@ import com.frogtest.movieguru.data.cache.entity.MovieEntity
 import com.frogtest.movieguru.data.cache.entity.MovieRemoteKeyEntity
 import com.frogtest.movieguru.data.mappers.toMovieEntity
 import com.frogtest.movieguru.data.network.api.OMDBMovieAPI
+import com.frogtest.movieguru.data.network.dto.MovieDto
 import javax.inject.Inject
 
 private const val TAG = "MovieNetworkMediator"
@@ -18,7 +19,8 @@ private const val TAG = "MovieNetworkMediator"
 @OptIn(ExperimentalPagingApi::class)
 class MovieNetworkMediator @Inject constructor(
     private val OMDBMovieApi: OMDBMovieAPI,
-    private val movieDb: MovieDatabase
+    private val movieDb: MovieDatabase,
+    private val sort: Boolean = false
 ): RemoteMediator<Int, MovieEntity>() {
 
     private val movieDao = movieDb.movieDao
@@ -54,6 +56,7 @@ class MovieNetworkMediator @Inject constructor(
             }
 
             val response = OMDBMovieApi.getMovies(page = currentPage).data
+
             val endOfPaginationReached = response.isEmpty()
 
             val prevPage = if (currentPage == 1) null else currentPage - 1
@@ -64,13 +67,20 @@ class MovieNetworkMediator @Inject constructor(
                     movieDao.clearAll()
                     remoteKeyDao.deleteAllRemoteKeys()
                 }
-                val keys = response.map { movieDto ->
+
+                val keys =  if (sort) {
+                   dirtyFix(response)
+                } else
+                    response.map { movieDto ->
                     MovieRemoteKeyEntity(
                         id = movieDto.imdbID,
+                        year = movieDto.year,
                         prevPage = prevPage,
                         nextPage = nextPage
-                    )
-                }
+                    ) }
+
+
+                remoteKeyDao.deleteAllRemoteKeys()
                 remoteKeyDao.addAllRemoteKeys(remoteKeys = keys)
                 movieDao.insertAll(movies = response.map { it.toMovieEntity() })
             }
@@ -106,5 +116,44 @@ class MovieNetworkMediator @Inject constructor(
             ?.let { movieEntity ->
                 remoteKeyDao.getRemoteKey(id = movieEntity.imdbID)
             }
+    }
+
+    private suspend fun dirtyFix(response: List<MovieDto>): List<MovieRemoteKeyEntity>{
+        //get all keys from DB
+        val keysdb = remoteKeyDao.getAllRemoteKeys()
+
+        //append keys from API
+
+        val keysAPI = response.map { movieDto ->
+            MovieRemoteKeyEntity(
+                id = movieDto.imdbID,
+                year = movieDto.year,
+                prevPage = null,
+                nextPage = null
+            )
+        }
+
+        //append keys from API to DB
+
+        val newKeys = keysdb.toMutableList()
+
+        newKeys.addAll(keysAPI)
+
+        //sort keys
+
+        val finalKeys = newKeys.sortedBy { it.year }
+
+        //modify prev and next page using pagination 10
+       return  finalKeys.mapIndexed { index, movieRemoteKeyEntity ->
+            MovieRemoteKeyEntity(
+                id = movieRemoteKeyEntity.id,
+                prevPage = if(index / 10 == 0) null else index / 10,
+                nextPage =  index /10 + 2,
+                year = movieRemoteKeyEntity.year
+            )
+        }
+
+
+
     }
 }
