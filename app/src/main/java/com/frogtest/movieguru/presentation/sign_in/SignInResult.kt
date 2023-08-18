@@ -1,4 +1,4 @@
-package com.frogtest.movieguru.presentation.auth
+package com.frogtest.movieguru.presentation.sign_in
 
 data class SignInResult(
     val data: UserData?,

@@ -1,6 +1,8 @@
 package com.frogtest.movieguru.di
 
+import com.frogtest.movieguru.data.repository.AuthRepositoryImpl
 import com.frogtest.movieguru.data.repository.MovieRepositoryImpl
+import com.frogtest.movieguru.domain.repository.AuthRepository
 import com.frogtest.movieguru.domain.repository.MovieRepository
 import dagger.Binds
 import dagger.Module
@@ -10,10 +12,14 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-abstract class  RepositoryModule {
+abstract class  MovieRepositoryModule {
 
     @Binds
     @Singleton
     abstract fun bindMovieRepository(movieRepositoryImpl: MovieRepositoryImpl): MovieRepository
+
+//    @Binds
+//    @Singleton
+//    abstract fun bindAuthRepository(authRepositoryImpl: AuthRepositoryImpl): AuthRepository
 
 }

@@ -3,19 +3,19 @@ package com.frogtest.movieguru
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.biometric.BiometricPrompt
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -27,9 +27,11 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
@@ -45,11 +47,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
-import com.frogtest.movieguru.presentation.auth.GoogleAuthUIClient
-import com.frogtest.movieguru.presentation.auth.SignInScreen
-import com.frogtest.movieguru.presentation.auth.SignInViewModel
+import com.frogtest.movieguru.navigation.Screen
+import com.frogtest.movieguru.presentation.sign_in.GoogleAuthUIClient
+import com.frogtest.movieguru.presentation.sign_in.SignInScreen
+import com.frogtest.movieguru.presentation.sign_in.SignInViewModel
 import com.frogtest.movieguru.presentation.movie_info.MovieDetailsScreen
 import com.frogtest.movieguru.presentation.movie_info.MovieDetailsViewModel
 import com.frogtest.movieguru.presentation.movies.MovieScreen
@@ -58,6 +60,9 @@ import com.frogtest.movieguru.presentation.profile.SettingsDialog
 import com.frogtest.movieguru.ui.theme.MovieGuruTheme
 import com.google.android.gms.auth.api.identity.Identity
 import com.frogtest.movieguru.preferences.SettingsDataStore
+import com.frogtest.movieguru.presentation.sign_up.SignUpScreen
+import com.frogtest.movieguru.presentation.sign_up.SignUpViewModel
+import com.frogtest.movieguru.presentation.verify_email.VerifyEmailScreen
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import java.util.concurrent.Executor
@@ -65,17 +70,16 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : FragmentActivity() {
-
-    companion object {
-        private const val TAG = "MainActivity"
-    }
+    @Inject
+    lateinit var settingsDataStore: SettingsDataStore
+    private val viewModel by viewModels<MainViewModel>()
 
     private val googleAuthUIClient by lazy {
         GoogleAuthUIClient(context = applicationContext, oneTapClient = Identity.getSignInClient(applicationContext))
     }
 
-    @Inject
-    lateinit var settingsDataStore: SettingsDataStore
+    private val TAG = "MainActivity"
+
     private lateinit var executor: Executor
     private lateinit var biometricPrompt: BiometricPrompt
     private lateinit var promptInfo: BiometricPrompt.PromptInfo
@@ -123,8 +127,8 @@ class MainActivity : FragmentActivity() {
                             onSignOut = {
                                 lifecycleScope.launch {
                                     googleAuthUIClient.signOut()
-                                    navController.navigate("auth") {
-                                        popUpTo("movies") { inclusive = true }
+                                    navController.navigate(Screen.SignInScreen.route) {
+                                        popUpTo(navController.graph.id) { inclusive = true }
                                     }
                                 }
 
@@ -141,7 +145,7 @@ class MainActivity : FragmentActivity() {
                       modifier = Modifier.fillMaxSize(),
                       topBar =
                       {
-                          if (currentDestination != "auth") {
+                          if (currentDestination != Screen.SignInScreen.route) {
                               TopBar(currentDestination = currentDestination,
                                   showSettingsDialog = showSettingsDialog,
                                   onSearchClicked = {
@@ -151,6 +155,7 @@ class MainActivity : FragmentActivity() {
                       },
                   ) { paddingValues ->
                       NavSetUp(navController, paddingValues, useFingerprint)
+
                   }
 
             }
@@ -168,7 +173,6 @@ class MainActivity : FragmentActivity() {
             title = { Text(text = "Movie Guru") },
             actions =
             {
-                if (currentDestination == "movies") {
 
                     // TODO:  Implement search
 //                    IconButton(onClick = { onSearchClicked() })
@@ -182,20 +186,26 @@ class MainActivity : FragmentActivity() {
 
                     IconButton(onClick = { showSettingsDialog.value = true })
                     {
+                        if(googleAuthUIClient.getSignedInUser()?.photoUrl != null) {
                         AsyncImage(
                             model = googleAuthUIClient.getSignedInUser()?.photoUrl,
-                            contentDescription = "Pic",
+                            contentDescription = "Profile",
                             modifier = Modifier
                                 .clip(shape = CircleShape),
-                            contentScale = ContentScale.Crop,
-                        )
+                            contentScale = ContentScale.Crop,)
+                        } else {
+                            Icon(
+                                imageVector = Icons.Default.AccountCircle,
+                                contentDescription = "Profile",
+                                tint = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
                     }
-
-                }
             }
         )
     }
 
+    @OptIn(ExperimentalComposeUiApi::class)
     @Composable
     private fun NavSetUp(
         navController: NavHostController,
@@ -204,19 +214,25 @@ class MainActivity : FragmentActivity() {
     ) {
         NavHost(
             navController = navController,
-            startDestination = "auth",
+            startDestination = Screen.SignInScreen.route,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues = paddingValues),
         ) {
 
-            composable("auth") {
+            composable(Screen.SignInScreen.route) {
                 val viewModel = hiltViewModel<SignInViewModel>()
                 val state by viewModel.state.collectAsStateWithLifecycle()
 
                 LaunchedEffect(key1 = Unit) {
                     if (googleAuthUIClient.getSignedInUser() !== null) {
-                        onNavigate(useFingerprint, navController)
+                        if (viewModel.isEmailVerified) {
+                            checkBiometricsAndNavigate(useFingerprint, navController)
+                        } else {
+                            navController.navigate(Screen.VerifyEmailScreen.route) {
+                                popUpTo(navController.graph.id) { inclusive = true }
+                            }
+                        }
                     }
                 }
 
@@ -237,14 +253,20 @@ class MainActivity : FragmentActivity() {
 
                 LaunchedEffect(key1 = state.isSignInSuccessful) {
                     if (state.isSignInSuccessful) {
-                        onNavigate(useFingerprint, navController)
-                        viewModel.resetState()
+                        if (viewModel.isEmailVerified) {
+                            checkBiometricsAndNavigate(useFingerprint, navController)
+                            viewModel.resetState()
+                        } else {
+                            navController.navigate(Screen.VerifyEmailScreen.route) {
+                                popUpTo(navController.graph.id) { inclusive = true }
+                            }
+                        }
                     }
                 }
 
                 SignInScreen(
                     state = state,
-                    onSignInClick = {
+                    onGoogleSignInClick = {
                         lifecycleScope.launch {
                             val signInIntentSender = googleAuthUIClient.signIn()
                             launcher.launch(
@@ -253,10 +275,25 @@ class MainActivity : FragmentActivity() {
                                 ).build()
                             )
                         }
-                    }
+                    },
+                    onPasswordSignInClick = { email, password ->
+                        viewModel.signInWithEmailAndPassword(email, password)
+                    },
+                    navigateToForgotPasswordScreen = {},
+                    navigateToSignUpScreen = {navController.navigate(Screen.SignUpScreen.route) }
                 )
             }
-            composable("movies") {
+            composable(Screen.VerifyEmailScreen.route){
+                VerifyEmailScreen(navigateToHomeScreen = { navController.navigate(Screen.MovieScreen.route) {
+                    popUpTo(navController.graph.id) { inclusive = true }
+                } })
+            }
+            composable(Screen.SignUpScreen.route){
+                val viewModel = hiltViewModel<SignUpViewModel>()
+
+                SignUpScreen(viewModel = viewModel, navigateBack = {navController.popBackStack()})
+            }
+            composable(Screen.MovieScreen.route) {
                 val viewModel = hiltViewModel<MovieViewModel>()
                 MovieScreen(navController = navController, viewModel = viewModel)
             }
@@ -281,7 +318,9 @@ class MainActivity : FragmentActivity() {
                     super.onAuthenticationError(errorCode, errString)
 
                     if (errorCode == BiometricPrompt.ERROR_NO_BIOMETRICS) {
-                        navigate(navController)
+                        navController.navigate(Screen.MovieScreen.route) {
+                            popUpTo(navController.graph.id) { inclusive = true }
+                        }
                     } else {
                         Toast.makeText(
                             applicationContext,
@@ -294,7 +333,9 @@ class MainActivity : FragmentActivity() {
                     result: BiometricPrompt.AuthenticationResult
                 ) {
                     super.onAuthenticationSucceeded(result)
-                    navigate(navController)
+                    navController.navigate(Screen.MovieScreen.route) {
+                        popUpTo(navController.graph.id) { inclusive = true }
+                    }
                 }
 
                 override fun onAuthenticationFailed() {
@@ -313,20 +354,16 @@ class MainActivity : FragmentActivity() {
             .build()
     }
 
-    private fun onNavigate(
+    private fun checkBiometricsAndNavigate(
         useFingerprint: Boolean,
         navController: NavHostController
     ) {
         if (true) {
             biometricPrompt.authenticate(promptInfo)
         } else {
-            navigate(navController)
-        }
-    }
-
-    private fun navigate(navController: NavHostController) {
-        navController.navigate("movies") {
-            popUpTo("auth") { inclusive = true }
+            navController.navigate(Screen.MovieScreen.route) {
+                popUpTo(navController.graph.id) { inclusive = true }
+            }
         }
     }
 }

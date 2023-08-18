@@ -62,7 +62,7 @@ class MovieDetailsViewModel @Inject constructor(
                         }
                         is Resource.Error -> {
                             state = state.copy(
-                                error = result.message ?: "An unexpected error occurred",
+                                error = result.errorMessage ?: "An unexpected error occurred",
                                 isLoading = false,
                                 movieDetails = null
                             )
@@ -100,7 +100,7 @@ class MovieDetailsViewModel @Inject constructor(
                         }
                         is Resource.Error -> {
                             state = state.copy(
-                                errorVideos = result.message ?: "An unexpected error occurred",
+                                errorVideos = result.errorMessage ?: "An unexpected error occurred",
                                 isLoadingVideos = false,
                                 movieDetails = null
                             )

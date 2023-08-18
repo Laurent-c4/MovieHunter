@@ -1,4 +1,4 @@
-package com.frogtest.movieguru.presentation.auth
+package com.frogtest.movieguru.presentation.sign_in
 
 import android.content.Context
 import android.content.Intent

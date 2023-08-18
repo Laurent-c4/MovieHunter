@@ -11,6 +11,10 @@ import com.frogtest.movieguru.data.cache.entity.MovieEntity
 import com.frogtest.movieguru.data.network.MovieNetworkMediator
 import com.frogtest.movieguru.data.network.api.OMDBMovieAPI
 import com.frogtest.movieguru.data.network.api.TMDBMovieAPI
+import com.frogtest.movieguru.data.repository.AuthRepositoryImpl
+import com.frogtest.movieguru.domain.repository.AuthRepository
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -59,5 +63,10 @@ object AppModule {
             .build()
             .create(TMDBMovieAPI::class.java)
     }
+
+    @Provides
+    fun provideAuthRepository(): AuthRepository = AuthRepositoryImpl(
+        auth = Firebase.auth
+    )
 
 }
