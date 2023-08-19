@@ -172,7 +172,9 @@ class MainActivity : FragmentActivity() {
                       modifier = Modifier.fillMaxSize(),
                       topBar =
                       {
-                          if (currentDestination != Screen.SignInScreen.route) {
+                          if (currentDestination != Screen.SignInScreen.route &&
+                              currentDestination != Screen.SignUpScreen.route &&
+                              currentDestination != Screen.ForgotPasswordScreen.route) {
                               TopBar(currentDestination = currentDestination,
                                   showSettingsDialog = showSettingsDialog,
                                   onSearchClicked = {
@@ -307,7 +309,8 @@ class MainActivity : FragmentActivity() {
                     onPasswordSignInClick = { email, password ->
                         viewModel.signInWithEmailAndPassword(email, password)
                     },
-                    navigateToForgotPasswordScreen = {},
+                    navigateToForgotPasswordScreen = {
+                        Toast.makeText(applicationContext, "To be implemented", Toast.LENGTH_SHORT).show()},
                     navigateToSignUpScreen = {navController.navigate(Screen.SignUpScreen.route) }
                 )
             }
