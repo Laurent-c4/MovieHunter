@@ -14,10 +14,12 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -26,7 +28,9 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
-
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
+import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 
 
 private const val TAG = "MovieScreen"
@@ -41,6 +45,7 @@ fun MovieScreen(
     val context = LocalContext.current
 
     val movies = viewModel.getMovies.collectAsLazyPagingItems()
+    val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = movies.loadState.refresh is LoadState.Loading)
     
     LaunchedEffect(key1 = movies.loadState) {
         if(movies.loadState.refresh is LoadState.Error) {
@@ -57,63 +62,75 @@ fun MovieScreen(
         }
         else {
 
-            if(useGrid)
-
-            LazyVerticalGrid(
-                columns = GridCells.Adaptive(minSize = 128.dp)
+            SwipeRefresh(
+                state = swipeRefreshState,
+                onRefresh = {movies.refresh()},
+                indicator = { state, refreshTrigger ->
+                    SwipeRefreshIndicator(
+                        state = state,
+                        refreshTriggerDistance = refreshTrigger,
+                        backgroundColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    )
+                },
             ) {
-                items(
-                    count = movies.itemCount,
-                    key = movies.itemKey { it.imdbID},
-                    contentType = movies.itemContentType { it }
-                ) { index ->
 
-                    val item = movies[index]
-
-                    item?.let {
-                        MovieGridItem(
-                            movie = it,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .clickable {
-                                    navController.navigate("movie/${it.imdbID}")
-                                }
-                        )
-                    }
-                }
-                item {
-                  if (movies.loadState.append is LoadState.Loading)
-                      CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                }
-            }
-
-            else
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    items(
-                        count = movies.itemCount,
-                        key = movies.itemKey { it.imdbID}
+                if (useGrid)
+                    LazyVerticalGrid(
+                        columns = GridCells.Adaptive(minSize = 128.dp)
                     ) {
-                        val item = movies[it]
+                        items(
+                            count = movies.itemCount,
+                            key = movies.itemKey { it.imdbID },
+                            contentType = movies.itemContentType { it }
+                        ) { index ->
 
-                        if (item != null)
-                            MovieItem(
-                                movie = item,
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .clickable {
-                                        navController.navigate("movie/${item.imdbID}")
-                                    }
-                            )
+                            val item = movies[index]
+
+                            item?.let {
+                                MovieGridItem(
+                                    movie = it,
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .clickable {
+                                            navController.navigate("movie/${it.imdbID}")
+                                        }
+                                )
+                            }
+                        }
+                        item {
+                            if (movies.loadState.append is LoadState.Loading)
+                                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                        }
                     }
-                    item {
-                        if (movies.loadState.append is LoadState.Loading)
-                            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                else
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        items(
+                            count = movies.itemCount,
+                            key = movies.itemKey { it.imdbID }
+                        ) {
+                            val item = movies[it]
+
+                            if (item != null)
+                                MovieItem(
+                                    movie = item,
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .clickable {
+                                            navController.navigate("movie/${item.imdbID}")
+                                        }
+                                )
+                        }
+                        item {
+                            if (movies.loadState.append is LoadState.Loading)
+                                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                        }
                     }
-                }
+            }
         }
     }
 

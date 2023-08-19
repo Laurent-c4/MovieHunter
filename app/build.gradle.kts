@@ -133,5 +133,9 @@ dependencies {
     //System UI Controller
     implementation ("com.google.accompanist:accompanist-systemuicontroller:0.28.0")
 
+    //Swipe Refresh
+    implementation ("com.google.accompanist:accompanist-swiperefresh:0.19.0")
+
+
 
 }
