@@ -1,5 +1,6 @@
 package com.frogtest.movieguru.data.network.api
 
+import com.frogtest.movieguru.BuildConfig
 import com.frogtest.movieguru.data.network.apiresponses.MoviesResponse
 import com.frogtest.movieguru.data.network.dto.MovieDetailsDto
 import retrofit2.http.GET
@@ -22,6 +23,6 @@ interface OMDBMovieAPI {
 
     companion object {
         const val BASE_URL = "https://www.omdbapi.com/"
-        const val API_KEY = "ff196f56"
+        const val API_KEY = BuildConfig.OMDB_API_KEY
     }
 }

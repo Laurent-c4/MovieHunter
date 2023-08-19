@@ -1,5 +1,6 @@
 package com.frogtest.movieguru.data.network.api
 
+import com.frogtest.movieguru.BuildConfig
 import com.frogtest.movieguru.data.network.apiresponses.MovieVideosResponse
 import com.frogtest.movieguru.data.network.dto.MovieDetailsTMDBDto
 import retrofit2.http.GET
@@ -25,6 +26,6 @@ interface TMDBMovieAPI {
 
     companion object {
         const val BASE_URL = "https://api.themoviedb.org/3/"
-        const val API_KEY = "fb7bb23f03b6994dafc674c074d01761"
+        const val API_KEY = BuildConfig.TMDB_API_KEY
     }
 }
