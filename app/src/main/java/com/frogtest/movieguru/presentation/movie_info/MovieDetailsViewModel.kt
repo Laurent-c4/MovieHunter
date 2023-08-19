@@ -36,7 +36,7 @@ class MovieDetailsViewModel @Inject constructor(
         }
     }
 
-    private fun getMovieDetails(
+    fun getMovieDetails(
         imdbID: String,
         fetchFromNetwork: Boolean = false
         ) {
