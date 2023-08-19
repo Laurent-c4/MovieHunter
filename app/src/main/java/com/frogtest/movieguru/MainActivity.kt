@@ -10,6 +10,7 @@ import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.biometric.BiometricPrompt
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -25,11 +26,13 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -39,8 +42,10 @@ import androidx.core.splashscreen.SplashScreen
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -62,16 +67,18 @@ import com.frogtest.movieguru.preferences.SettingsDataStore
 import com.frogtest.movieguru.presentation.sign_up.SignUpScreen
 import com.frogtest.movieguru.presentation.sign_up.SignUpViewModel
 import com.frogtest.movieguru.presentation.verify_email.VerifyEmailScreen
+import com.frogtest.movieguru.util.DarkThemeConfig
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import java.util.concurrent.Executor
 import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : FragmentActivity() {
-    @Inject
-    lateinit var settingsDataStore: SettingsDataStore
-    private val viewModel by viewModels<MainViewModel>()
+    private val viewModel by viewModels<MainActivityViewModel>()
 
     private val googleAuthUIClient by lazy {
         GoogleAuthUIClient(context = applicationContext, oneTapClient = Identity.getSignInClient(applicationContext))
@@ -83,25 +90,51 @@ class MainActivity : FragmentActivity() {
     private lateinit var biometricPrompt: BiometricPrompt
     private lateinit var promptInfo: BiometricPrompt.PromptInfo
 
-    private var keepSplash = true
-    private val delay = 1000L
-    private fun setupSplashScreen(splashScreen: SplashScreen) {
-        // Replace this timer with your logic to load data on the splash screen.
-        splashScreen.setKeepOnScreenCondition { keepSplash }
-        Handler(Looper.getMainLooper()).postDelayed({
-            keepSplash = false
-        }, delay)
-    }
-
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         val splashScreen = installSplashScreen()
-        setupSplashScreen(splashScreen = splashScreen)
+
+        var uiState: MainActivityUiState by mutableStateOf(MainActivityUiState.Loading)
+
+        // Update the uiState
+        lifecycleScope.launch {
+            lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.uiState
+                    .onEach {
+                        uiState = it
+                    }
+                    .collect()
+            }
+        }
+
+        // Keep the splash screen on-screen until the UI state is loaded. This condition is
+        // evaluated each time the app needs to be redrawn so it should be fast to avoid blocking
+        // the UI.
+        splashScreen.setKeepOnScreenCondition {
+            when (uiState) {
+                MainActivityUiState.Loading -> true
+                is MainActivityUiState.Success -> false
+            }
+        }
 
         setContent {
-            MovieGuruTheme {
+            val darkTheme = shouldUseDarkTheme(uiState)
+            val systemUiController = rememberSystemUiController()
+            val useFingerprint = shouldUseFingerPrint(uiState = uiState)
+            val useGrid = shouldUseGrid(uiState = uiState)
+            val useDynamicColor = useDynamicColor(uiState = uiState)
+
+            // Update the dark content of the system bars to match the theme
+            DisposableEffect(systemUiController, darkTheme) {
+                systemUiController.systemBarsDarkContentEnabled = !darkTheme
+                onDispose {}
+            }
+
+            MovieGuruTheme(
+                darkTheme = darkTheme,
+                dynamicColor = useDynamicColor
+            ) {
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
@@ -112,7 +145,6 @@ class MainActivity : FragmentActivity() {
                     val currentDestination = navBackStackEntry?.destination?.route
 
                     val biometricsInitialised = remember { mutableStateOf(false) }
-                    val useGrid = settingsDataStore.useGrid.value
                     if (!biometricsInitialised.value) {
                         initBiometrics(navController)
                         biometricsInitialised.value = true
@@ -121,7 +153,7 @@ class MainActivity : FragmentActivity() {
                     val showSettingsDialog = remember { mutableStateOf(false) }
                     if (showSettingsDialog.value) {
                         SettingsDialog(
-                            userData = googleAuthUIClient.getSignedInUser(),
+                            userProfile  = googleAuthUIClient.getSignedInUser(),
                             onDismiss = { showSettingsDialog.value = false },
                             onSignOut = {
                                 lifecycleScope.launch {
@@ -133,10 +165,6 @@ class MainActivity : FragmentActivity() {
 
                                 showSettingsDialog.value = false
                             },
-                            onToggleUseGrid = {
-                                settingsDataStore.toggleUseGrid()
-                            },
-                            useGrid = useGrid
                         )
                   }
 
@@ -153,7 +181,7 @@ class MainActivity : FragmentActivity() {
                           }
                       },
                   ) { paddingValues ->
-                      NavSetUp(navController, paddingValues)
+                      NavSetUp(navController, paddingValues, useGrid, useFingerprint)
 
                   }
 
@@ -209,7 +237,8 @@ class MainActivity : FragmentActivity() {
     private fun NavSetUp(
         navController: NavHostController,
         paddingValues: PaddingValues,
-        useGrid: Boolean = settingsDataStore.useGrid.value
+        useGrid: Boolean,
+        useFingerPrint: Boolean
     ) {
         NavHost(
             navController = navController,
@@ -226,7 +255,7 @@ class MainActivity : FragmentActivity() {
                 LaunchedEffect(key1 = Unit) {
                     if (googleAuthUIClient.getSignedInUser() !== null) {
                         if (viewModel.isEmailVerified) {
-                            checkBiometricsAndNavigate(navController = navController)
+                            checkBiometricsAndNavigate(navController = navController, useFingerprint = useFingerPrint)
                         } else {
                             navController.navigate(Screen.VerifyEmailScreen.route) {
                                 popUpTo(navController.graph.id) { inclusive = true }
@@ -253,7 +282,7 @@ class MainActivity : FragmentActivity() {
                 LaunchedEffect(key1 = state.isSignInSuccessful) {
                     if (state.isSignInSuccessful) {
                         if (viewModel.isEmailVerified) {
-                            checkBiometricsAndNavigate(navController =  navController)
+                            checkBiometricsAndNavigate(navController =  navController, useFingerprint = useFingerPrint)
                             viewModel.resetState()
                         } else {
                             navController.navigate(Screen.VerifyEmailScreen.route) {
@@ -364,5 +393,52 @@ class MainActivity : FragmentActivity() {
                 popUpTo(navController.graph.id) { inclusive = true }
             }
         }
+    }
+
+    /**
+     * Returns `true` if the dynamic color is disabled, as a function of the [uiState].
+     */
+    @Composable
+    private fun useDynamicColor(
+        uiState: MainActivityUiState,
+    ): Boolean = when (uiState) {
+        MainActivityUiState.Loading -> false
+        is MainActivityUiState.Success -> uiState.userSettings.useDynamicColor
+    }
+
+    /**
+     * Returns `true` if dark theme should be used, as a function of the [uiState] and the
+     * current system context.
+     */
+    @Composable
+    private fun shouldUseDarkTheme(
+        uiState: MainActivityUiState,
+    ): Boolean = when (uiState) {
+        MainActivityUiState.Loading -> isSystemInDarkTheme()
+        is MainActivityUiState.Success -> when (uiState.userSettings.darkThemeConfig) {
+            DarkThemeConfig.FOLLOW_SYSTEM -> isSystemInDarkTheme()
+            DarkThemeConfig.LIGHT -> false
+            DarkThemeConfig.DARK -> true
+            else -> {
+                // Should never happen, but if it does, default to following the system
+                // dark theme setting.
+                isSystemInDarkTheme()}
+        }
+    }
+
+    @Composable
+    private fun shouldUseGrid(
+        uiState: MainActivityUiState,
+    ): Boolean = when (uiState) {
+        MainActivityUiState.Loading -> false
+        is MainActivityUiState.Success -> uiState.userSettings.useGrid
+    }
+
+    @Composable
+    private fun shouldUseFingerPrint(
+        uiState: MainActivityUiState,
+    ): Boolean = when (uiState) {
+        MainActivityUiState.Loading -> false
+        is MainActivityUiState.Success -> uiState.userSettings.useFingerPrint
     }
 }

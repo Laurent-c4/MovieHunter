@@ -130,5 +130,8 @@ dependencies {
     // Splash Screen
     implementation ("androidx.core:core-splashscreen:1.0.1")
 
+    //System UI Controller
+    implementation ("com.google.accompanist:accompanist-systemuicontroller:0.28.0")
+
 
 }

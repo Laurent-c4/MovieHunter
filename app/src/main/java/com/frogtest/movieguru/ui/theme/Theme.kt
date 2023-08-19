@@ -2,6 +2,7 @@ package com.frogtest.movieguru.ui.theme
 
 import android.app.Activity
 import android.os.Build
+import androidx.annotation.ChecksSdkIntAtLeast
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
@@ -68,3 +69,6 @@ fun MovieGuruTheme(
         content = content
     )
 }
+
+@ChecksSdkIntAtLeast(api = Build.VERSION_CODES.S)
+fun supportsDynamicTheming() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S

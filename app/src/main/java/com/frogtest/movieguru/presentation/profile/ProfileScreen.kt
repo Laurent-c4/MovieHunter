@@ -19,11 +19,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.frogtest.movieguru.presentation.sign_in.UserData
+import com.frogtest.movieguru.presentation.sign_in.UserProfile
 
 @Composable
 fun ProfileScreen(
-    userData: UserData?,
+    userData: UserProfile?,
     onSignOutClick: () -> Unit
 ) {
     Column(

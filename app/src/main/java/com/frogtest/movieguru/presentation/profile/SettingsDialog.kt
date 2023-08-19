@@ -25,9 +25,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -40,6 +42,7 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -47,21 +50,49 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.content.ContextCompat
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.frogtest.movieguru.R
-import com.frogtest.movieguru.presentation.sign_in.UserData
-
+import com.frogtest.movieguru.domain.model.UserSettings
+import com.frogtest.movieguru.presentation.sign_in.UserProfile
+import com.frogtest.movieguru.ui.theme.supportsDynamicTheming
+import com.frogtest.movieguru.util.DarkThemeConfig
 @Composable
 fun SettingsDialog(
-    userData: UserData?,
+    userProfile: UserProfile?,
     onDismiss: () -> Unit,
     onSignOut: () -> Unit,
-    onToggleUseGrid: () -> Unit,
-    useGrid: Boolean = false,
-    //    viewModel: SettingsViewModel = hiltViewModel(),
+    viewModel: SettingsViewModel = hiltViewModel(),
+) {
+    val settingsUiState by viewModel.settingsUiState.collectAsStateWithLifecycle()
+    SettingsDialogImpl(
+        userProfile = userProfile,
+        onDismiss = onDismiss,
+        settingsUiState = settingsUiState,
+        onSignOut = onSignOut,
+        onToggleUseGrid = viewModel::toggleUseGrid,
+        onToggleUseFingerprint = viewModel::toggleUseFingerPrint,
+        onChangeDynamicColorPreference = viewModel::updateDynamicColorPreference,
+        onChangeDarkThemePreference = viewModel::updateDarkThemeConfig,
+    )
+}
+
+@Composable
+fun SettingsDialogImpl(
+    userProfile: UserProfile?,
+    settingsUiState: SettingsUiState,
+    supportDynamicColor: Boolean = supportsDynamicTheming(),
+    onDismiss: () -> Unit,
+    onSignOut: () -> Unit,
+    onToggleUseGrid: (useGrid: Boolean) -> Unit,
+    onToggleUseFingerprint: (useFingerPrint: Boolean) -> Unit,
+    onChangeDynamicColorPreference: (useDynamicColor: Boolean) -> Unit,
+    onChangeDarkThemePreference: (darkThemeConfig: String) -> Unit,
 ) {
     val configuration = LocalConfiguration.current
 
@@ -77,52 +108,30 @@ fun SettingsDialog(
         },
         text = {
             Column(Modifier.verticalScroll(rememberScrollState())) {
-                Row {
-                    if (userData?.photoUrl != null) {
-                        AsyncImage(
-                            model = userData.photoUrl,
-                            contentDescription = "Pic",
-                            modifier = Modifier
-                                .size(48.dp)
-                                .clip(shape = CircleShape),
-                            contentScale = ContentScale.Crop
-                        )
-                    } else {
-                        Icon(
-                            imageVector = Icons.Default.AccountCircle,
-                            contentDescription = "Profile",
-                            tint = MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier
-                                .size(48.dp)
-//                                .clip(shape = CircleShape)
-                                .align(Alignment.CenterVertically)
+                Profile(userProfile)
+                Divider(Modifier.padding(top = 8.dp))
+                when (settingsUiState) {
+                    SettingsUiState.Loading -> {
+                        Text(
+                            text = stringResource(R.string.loading),
+                            modifier = Modifier.padding(vertical = 16.dp),
                         )
                     }
-                    Column(
-                        Modifier
-                            .padding(start = 16.dp)
-                            .align(Alignment.CenterVertically)
-                    ) {
-                        Text(
-                            text = userData?.name ?: "",
-                            style = MaterialTheme.typography.labelLarge,
-                        )
-                        Text(
-                            text = userData?.email ?: "",
-                            style = MaterialTheme.typography.labelMedium,
+
+                    is SettingsUiState.Success -> {
+                        FingerprintSwitch(useFingerprint = settingsUiState.settings.useFingerPrint, onToggleFingerprint = onToggleUseFingerprint)
+                        Divider(Modifier.padding(top = 8.dp))
+                        SettingsPanel(
+                            settings = settingsUiState.settings,
+                            supportDynamicColor = supportDynamicColor,
+                            onChangeDynamicColorPreference = onChangeDynamicColorPreference,
+                            onChangeDarkThemeConfig = onChangeDarkThemePreference,
+                            onToggleUseGrid = onToggleUseGrid,
+                            onToggleUseFingerprint = onToggleUseFingerprint,
                         )
                     }
                 }
-
                 Divider(Modifier.padding(top = 8.dp))
-
-//                FingerprintSwitch(useFingerprint = useFingerprint, onToggleFingerprint = onToggleFingerprint)
-
-                ToggleListView(useGrid = useGrid, onToggleUseGrid = onToggleUseGrid)
-
-                Divider(Modifier.padding(top = 8.dp))
-
-
                 LinksPanel()
             }
         },
@@ -140,11 +149,51 @@ fun SettingsDialog(
 }
 
 @Composable
-private fun FingerprintSwitch(useFingerprint: Boolean, onToggleFingerprint: () -> Unit) {
+private fun Profile(userProfile: UserProfile?) {
+    Row {
+        if (userProfile?.photoUrl != null) {
+            AsyncImage(
+                model = userProfile.photoUrl,
+                contentDescription = "Pic",
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(shape = CircleShape),
+                contentScale = ContentScale.Crop
+            )
+        } else {
+            Icon(
+                imageVector = Icons.Default.AccountCircle,
+                contentDescription = "Profile",
+                tint = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier
+                    .size(48.dp)
+//                                .clip(shape = CircleShape)
+                    .align(Alignment.CenterVertically)
+            )
+        }
+        Column(
+            Modifier
+                .padding(start = 16.dp)
+                .align(Alignment.CenterVertically)
+        ) {
+            Text(
+                text = userProfile?.name ?: "",
+                style = MaterialTheme.typography.labelLarge,
+            )
+            Text(
+                text = userProfile?.email ?: "",
+                style = MaterialTheme.typography.labelMedium,
+            )
+        }
+    }
+}
+
+@Composable
+private fun FingerprintSwitch(useFingerprint: Boolean, onToggleFingerprint: (useFingerPrint: Boolean) -> Unit) {
     Row (verticalAlignment = Alignment.CenterVertically) {
         Text(text = stringResource(R.string.use_fingerprint))
         Spacer(Modifier.weight(1f))
-        Switch(checked = useFingerprint, onCheckedChange = { onToggleFingerprint() })
+        Switch(checked = useFingerprint, onCheckedChange = { onToggleFingerprint(!useFingerprint) })
     }
 }
 
@@ -181,6 +230,99 @@ fun ToggleListView(useGrid: Boolean, onToggleUseGrid: () -> Unit) {
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun SettingsPanel(
+    settings: UserEditableSettings,
+    supportDynamicColor: Boolean,
+    onChangeDynamicColorPreference: (useDynamicColor: Boolean) -> Unit,
+    onChangeDarkThemeConfig: (darkThemeConfig: String) -> Unit,
+    onToggleUseGrid: (useGrid: Boolean) -> Unit,
+    onToggleUseFingerprint: (useFingerPrint: Boolean) -> Unit,
+) {
+
+    SettingsDialogSectionTitle(text = stringResource(R.string.movie_listing))
+    Column(Modifier.selectableGroup()) {
+        SettingsDialogThemeChooserRow(
+            text = stringResource(R.string.grid),
+            selected = settings.useGrid,
+            onClick = { onToggleUseGrid(true) },
+        )
+        SettingsDialogThemeChooserRow(
+            text = stringResource(R.string.list),
+            selected = !settings.useGrid,
+            onClick = { onToggleUseGrid(false) },
+        )
+    }
+    if (supportDynamicColor) {
+        SettingsDialogSectionTitle(text = stringResource(R.string.dynamic_color_preference))
+        Column(Modifier.selectableGroup()) {
+            SettingsDialogThemeChooserRow(
+                text = stringResource(R.string.dynamic_color_yes),
+                selected = settings.useDynamicColor,
+                onClick = { onChangeDynamicColorPreference(true) },
+            )
+            SettingsDialogThemeChooserRow(
+                text = stringResource(R.string.dynamic_color_no),
+                selected = !settings.useDynamicColor,
+                onClick = { onChangeDynamicColorPreference(false) },
+            )
+        }
+    }
+    SettingsDialogSectionTitle(text = stringResource(R.string.dark_mode_preference))
+    Column(Modifier.selectableGroup()) {
+        SettingsDialogThemeChooserRow(
+            text = stringResource(R.string.dark_mode_config_system_default),
+            selected = settings.darkThemeConfig == DarkThemeConfig.FOLLOW_SYSTEM,
+            onClick = { onChangeDarkThemeConfig(DarkThemeConfig.FOLLOW_SYSTEM) },
+        )
+        SettingsDialogThemeChooserRow(
+            text = stringResource(R.string.dark_mode_config_light),
+            selected = settings.darkThemeConfig == DarkThemeConfig.LIGHT,
+            onClick = { onChangeDarkThemeConfig(DarkThemeConfig.LIGHT) },
+        )
+        SettingsDialogThemeChooserRow(
+            text = stringResource(R.string.dark_mode_config_dark),
+            selected = settings.darkThemeConfig == DarkThemeConfig.DARK,
+            onClick = { onChangeDarkThemeConfig(DarkThemeConfig.DARK) },
+        )
+    }
+}
+
+@Composable
+private fun SettingsDialogSectionTitle(text: String) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.titleMedium,
+        modifier = Modifier.padding(top = 16.dp, bottom = 8.dp),
+    )
+}
+
+@Composable
+fun SettingsDialogThemeChooserRow(
+    text: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+) {
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .selectable(
+                selected = selected,
+                role = Role.RadioButton,
+                onClick = onClick,
+            )
+            .padding(12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        RadioButton(
+            selected = selected,
+            onClick = null,
+        )
+        Spacer(Modifier.width(8.dp))
+        Text(text)
     }
 }
 

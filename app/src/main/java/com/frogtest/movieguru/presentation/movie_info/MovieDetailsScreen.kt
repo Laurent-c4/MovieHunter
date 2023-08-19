@@ -1,5 +1,6 @@
 package com.frogtest.movieguru.presentation.movie_info
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -117,60 +118,66 @@ fun MovieDetailsScreen(
 
             }
 
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Bottom
+            val ytVideos = state.movieVideos.filter { it.site == "YouTube" }
+
+            AnimatedVisibility(
+                visible = ytVideos.isNotEmpty(),
+
             ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Bottom
+                ) {
 
-                val ytVideos = state.movieVideos.filter { it.site == "YouTube" }
+                    Box {
 
-                Box {
+                        HorizontalPager(
+                            pageCount = ytVideos.size,
+                            state = pagerState,
+                            key = {ytVideos[it].key!!}
+                        ) { index ->
+                            YoutubePlayer(youtubeVideoID = ytVideos[index].key!!)
+                        }
 
-                    HorizontalPager(
-                        pageCount = ytVideos.size,
-                        state = pagerState,
-                        key = {ytVideos[it].key!!}
-                    ) { index ->
-                        YoutubePlayer(youtubeVideoID = ytVideos[index].key!!)
                     }
 
-                }
-
-                if(ytVideos.size > 1) {
-                    Box(modifier = Modifier
-                        .offset(y = -(16).dp)
-                        .fillMaxWidth(0.5f)
-                        .clip(RoundedCornerShape(100))
-                        .background(MaterialTheme.colorScheme.background)
+                    if(ytVideos.size > 1) {
+                        Box(modifier = Modifier
+                            .offset(y = -(16).dp)
+                            .fillMaxWidth(0.5f)
+                            .clip(RoundedCornerShape(100))
+                            .background(MaterialTheme.colorScheme.background)
 //                    .padding(8.dp)
-                        .align(Alignment.CenterHorizontally)
-                    )
-                    {
-                        IconButton(
-                            onClick = {
-                                scope.launch {
-                                    pagerState.animateScrollToPage(pagerState.currentPage - 1)
-                                }
-                            },
-                            modifier = Modifier.align(Alignment.CenterStart)
-                        ) {
-                            Icon(imageVector = Icons.Default.KeyboardArrowLeft, contentDescription = "Previous")
-                        }
+                            .align(Alignment.CenterHorizontally)
+                        )
+                        {
+                            IconButton(
+                                onClick = {
+                                    scope.launch {
+                                        pagerState.animateScrollToPage(pagerState.currentPage - 1)
+                                    }
+                                },
+                                modifier = Modifier.align(Alignment.CenterStart)
+                            ) {
+                                Icon(imageVector = Icons.Default.KeyboardArrowLeft, contentDescription = "Previous")
+                            }
 
-                        IconButton(
-                            onClick = {
-                                scope.launch {
-                                    pagerState.animateScrollToPage(pagerState.currentPage + 1)
-                                }
-                            },
-                            modifier = Modifier.align(Alignment.CenterEnd)
-                        ) {
-                            Icon(imageVector = Icons.Default.KeyboardArrowRight, contentDescription = "Next")
+                            IconButton(
+                                onClick = {
+                                    scope.launch {
+                                        pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                                    }
+                                },
+                                modifier = Modifier.align(Alignment.CenterEnd)
+                            ) {
+                                Icon(imageVector = Icons.Default.KeyboardArrowRight, contentDescription = "Next")
+                            }
                         }
                     }
-                }
 
+                }
             }
+
         }
 
     }
