@@ -12,6 +12,15 @@
 #   public *;
 #}
 
+-keep class com.google.android.gms.** { *; }
+-keep class com.google.firebase.** { *; }
+-dontwarn com.google.android.gms.**
+-dontwarn com.google.firebase.**
+
+-keep class com.frogtest.movieguru.data.network.dto.** { *; }
+-keep class com.frogtest.movieguru.data.cache.entity.** { *; }
+-keep class com.frogtest.movieguru.domain.model.** { *; }
+
 # Uncomment this to preserve the line number information for
 # debugging stack traces.
 #-keepattributes SourceFile,LineNumberTable
