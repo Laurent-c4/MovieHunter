@@ -67,15 +67,15 @@ fun MovieScreen(
     LaunchedEffect(key1 = movies.loadState) {
         if (movies.loadState.refresh is LoadState.Error) {
             if (movies.itemCount > 0)
-                Toast.makeText(
-                    context,
-                    "Error: " + (movies.loadState.refresh as LoadState.Error).error.message,
-                    Toast.LENGTH_LONG
-                ).show()
-            Log.e(
-                TAG,
-                "MovieScreen: Load Error" + (movies.loadState.refresh as LoadState.Error).error.message
-            )
+//                Toast.makeText(
+//                    context,
+//                    "Error: " + (movies.loadState.refresh as LoadState.Error).error.message,
+//                    Toast.LENGTH_LONG
+//                ).show()
+                Log.e(
+                    TAG,
+                    "MovieScreen: Load Error" + (movies.loadState.refresh as LoadState.Error).error.message
+                )
         }
     }
 
