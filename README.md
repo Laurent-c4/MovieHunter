@@ -1,7 +1,7 @@
 Movie Guru
 
 ## Description
-This is a movie search app that allows users to search for movies and view the movie details. The app also allows users to save their favorite movies to a list.
+This is a movie search app that allows users to search for movies and view the movie details. The app also allows users to watch movie trailers where available.
 
 ## Table of Contents
 * [Installation](#installation)
