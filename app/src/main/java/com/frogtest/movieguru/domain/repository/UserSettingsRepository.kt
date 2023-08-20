@@ -29,4 +29,9 @@ interface UserSettingsRepository {
      * Sets whether user should use fingerprint
      */
     suspend fun useFingerPrint(useFingerPrint: Boolean)
+
+    /**
+     * Sets whether movies should be sort
+     */
+    suspend fun toggleSort(sort: Boolean)
 }

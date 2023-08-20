@@ -1,5 +1,6 @@
 package com.frogtest.movieguru.presentation.sign_in
 
+import android.content.Intent
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -23,6 +24,8 @@ class SignInViewModel @Inject constructor(
     private val _state = MutableStateFlow(SignInState())
     val state = _state.asStateFlow()
 
+    val getSignedInUser get() = authRepository.getSignedInUser()
+
     fun onSignInResult(result: SignInResult) {
         _state.update {it.copy(
             isSignInSuccessful = result.data != null,
@@ -33,6 +36,12 @@ class SignInViewModel @Inject constructor(
     fun resetState() {
         _state.update { SignInState() }
     }
+
+
+    suspend fun googleSignInIntentSender() = authRepository.googleSignInIntentSender()
+
+    suspend fun googleSignInWithIntent(intent: Intent) = authRepository.googleSignInWithIntent(intent)
+
 
     fun signInWithEmailAndPassword(email: String, password: String) {
         viewModelScope.launch {

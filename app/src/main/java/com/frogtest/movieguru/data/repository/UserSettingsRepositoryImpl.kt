@@ -44,5 +44,9 @@ class UserSettingsRepositoryImpl @Inject constructor(
         preferencesDataSource.toggleUseFingerPrint(useFingerPrint)
     }
 
+    override suspend fun toggleSort(sort: Boolean) {
+        preferencesDataSource.toggleSort(sort)
+    }
+
 
 }

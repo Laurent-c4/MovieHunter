@@ -16,20 +16,28 @@
 
 package com.frogtest.movieguru
 
+import android.content.Intent
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.frogtest.movieguru.domain.model.UserSettings
+import com.frogtest.movieguru.domain.repository.AuthRepository
 import com.frogtest.movieguru.domain.repository.UserSettingsRepository
+import com.frogtest.movieguru.presentation.sign_in.SignInResult
+import com.frogtest.movieguru.presentation.sign_in.UserProfile
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class MainActivityViewModel @Inject constructor(
-    userDataRepository: UserSettingsRepository,
+    private val userDataRepository: UserSettingsRepository,
+    private val authRepository: AuthRepository
 ) : ViewModel() {
     val uiState: StateFlow<MainActivityUiState> = userDataRepository.userSettings.map {
         MainActivityUiState.Success(it)
@@ -38,6 +46,11 @@ class MainActivityViewModel @Inject constructor(
         initialValue = MainActivityUiState.Loading,
         started = SharingStarted.WhileSubscribed(5_000),
     )
+
+    fun getAuthState() = authRepository.getAuthState(viewModelScope)
+
+    val getSignedInUser get() = authRepository.getSignedInUser()
+
 }
 
 sealed interface MainActivityUiState {

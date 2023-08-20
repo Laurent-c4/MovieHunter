@@ -37,6 +37,7 @@ constructor(app: MovieApp) {
             useDynamicColor = preferences[USE_DYNAMIC_COLOR] ?: true,
             useFingerPrint = preferences[USE_FINGERPRINT] ?: true,
             darkThemeConfig  = preferences[DATA_THEME_CONFIG] ?: DarkThemeConfig.FOLLOW_SYSTEM,
+            sort = preferences[SORT] ?: false
 
         )
     }
@@ -45,6 +46,14 @@ constructor(app: MovieApp) {
         scope.launch {
             datastore.edit { preferences ->
                 preferences[USE_GRID] = useGrid
+            }
+        }
+    }
+
+    fun toggleSort(sort:Boolean) {
+        scope.launch {
+            datastore.edit { preferences ->
+                preferences[SORT] = sort
             }
         }
     }
@@ -78,6 +87,7 @@ constructor(app: MovieApp) {
         private val USE_DYNAMIC_COLOR = booleanPreferencesKey("use_dynamic_color_key")
         private val DATA_THEME_CONFIG = stringPreferencesKey("data_theme_config_key")
         private val USE_FINGERPRINT = booleanPreferencesKey("use_fingerprint_key")
+        private val SORT = booleanPreferencesKey("sort_key")
 
     }
 }

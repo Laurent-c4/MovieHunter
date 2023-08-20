@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface MovieRepository {
 
-    fun getMovies(sort: Boolean = false): Flow<PagingData<MovieEntity>>
+    fun getMovies(sort: Boolean = false, query: String): Flow<PagingData<MovieEntity>>
 
     suspend fun getMovieDetails(
         fetchFromNetwork: Boolean,

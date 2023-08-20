@@ -5,7 +5,7 @@ import com.squareup.moshi.Json
 
 data class MoviesResponse(
     @field:Json(name = "Search")
-    val data: List<MovieDto>,
+    val data: List<MovieDto>?,
     @field:Json(name = "totalResults")
     val totalResults: String,
     @field:Json(name = "Response")

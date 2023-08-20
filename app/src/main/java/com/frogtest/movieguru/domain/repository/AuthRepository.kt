@@ -1,5 +1,9 @@
 package com.frogtest.movieguru.domain.repository
 
+import android.content.Intent
+import android.content.IntentSender
+import com.frogtest.movieguru.presentation.sign_in.SignInResult
+import com.frogtest.movieguru.presentation.sign_in.UserProfile
 import com.frogtest.movieguru.util.Resource
 import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.CoroutineScope
@@ -17,6 +21,12 @@ typealias AuthStateResponse = StateFlow<Boolean>
 interface AuthRepository {
     val currentUser: FirebaseUser?
 
+    suspend fun googleSignInIntentSender(): IntentSender?
+
+    suspend fun googleSignInWithIntent(intent: Intent): SignInResult
+
+    fun getSignedInUser(): UserProfile?
+
     suspend fun firebaseSignUpWithEmailAndPassword(email: String, password: String): SignUpResponse
 
     suspend fun sendEmailVerification(): SendEmailVerificationResponse
@@ -27,7 +37,7 @@ interface AuthRepository {
 
     suspend fun sendPasswordResetEmail(email: String): SendPasswordResetEmailResponse
 
-    fun signOut()
+    suspend fun signOut()
 
     suspend fun revokeAccess(): RevokeAccessResponse
 

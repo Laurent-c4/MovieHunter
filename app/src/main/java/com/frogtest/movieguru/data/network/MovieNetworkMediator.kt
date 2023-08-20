@@ -17,10 +17,11 @@ import javax.inject.Inject
 private const val TAG = "MovieNetworkMediator"
 
 @OptIn(ExperimentalPagingApi::class)
-class MovieNetworkMediator @Inject constructor(
+class MovieNetworkMediator(
     private val OMDBMovieApi: OMDBMovieAPI,
     private val movieDb: MovieDatabase,
-    private val sort: Boolean = false
+    private val sort: Boolean = false,
+    private val query: String
 ): RemoteMediator<Int, MovieEntity>() {
 
     private val movieDao = movieDb.movieDao
@@ -55,7 +56,7 @@ class MovieNetworkMediator @Inject constructor(
                 }
             }
 
-            val response = OMDBMovieApi.getMovies(page = currentPage).data
+            val response = OMDBMovieApi.getMovies(page = currentPage, title = query ).data?: emptyList()
 
             val endOfPaginationReached = response.isEmpty()
 

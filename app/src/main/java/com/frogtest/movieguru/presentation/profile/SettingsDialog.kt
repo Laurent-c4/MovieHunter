@@ -62,19 +62,18 @@ import com.frogtest.movieguru.domain.model.UserSettings
 import com.frogtest.movieguru.presentation.sign_in.UserProfile
 import com.frogtest.movieguru.ui.theme.supportsDynamicTheming
 import com.frogtest.movieguru.util.DarkThemeConfig
+
 @Composable
 fun SettingsDialog(
-    userProfile: UserProfile?,
     onDismiss: () -> Unit,
-    onSignOut: () -> Unit,
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
     val settingsUiState by viewModel.settingsUiState.collectAsStateWithLifecycle()
     SettingsDialogImpl(
-        userProfile = userProfile,
+        userProfile = viewModel.getSignedInUser,
         onDismiss = onDismiss,
         settingsUiState = settingsUiState,
-        onSignOut = onSignOut,
+        onSignOut = viewModel::signOut,
         onToggleUseGrid = viewModel::toggleUseGrid,
         onToggleUseFingerprint = viewModel::toggleUseFingerPrint,
         onChangeDynamicColorPreference = viewModel::updateDynamicColorPreference,
@@ -119,7 +118,10 @@ fun SettingsDialogImpl(
                     }
 
                     is SettingsUiState.Success -> {
-                        FingerprintSwitch(useFingerprint = settingsUiState.settings.useFingerPrint, onToggleFingerprint = onToggleUseFingerprint)
+                        FingerprintSwitch(
+                            useFingerprint = settingsUiState.settings.useFingerPrint,
+                            onToggleFingerprint = onToggleUseFingerprint
+                        )
                         Divider(Modifier.padding(top = 8.dp))
                         SettingsPanel(
                             settings = settingsUiState.settings,
@@ -142,7 +144,10 @@ fun SettingsDialogImpl(
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier
                     .padding(horizontal = 8.dp)
-                    .clickable { onSignOut() },
+                    .clickable {
+                        onSignOut()
+                        onDismiss()
+                    },
             )
         },
     )
@@ -189,8 +194,11 @@ private fun Profile(userProfile: UserProfile?) {
 }
 
 @Composable
-private fun FingerprintSwitch(useFingerprint: Boolean, onToggleFingerprint: (useFingerPrint: Boolean) -> Unit) {
-    Row (verticalAlignment = Alignment.CenterVertically) {
+private fun FingerprintSwitch(
+    useFingerprint: Boolean,
+    onToggleFingerprint: (useFingerPrint: Boolean) -> Unit
+) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
         Text(text = stringResource(R.string.use_fingerprint))
         Spacer(Modifier.weight(1f))
         Switch(checked = useFingerprint, onCheckedChange = { onToggleFingerprint(!useFingerprint) })
@@ -201,14 +209,15 @@ private fun FingerprintSwitch(useFingerprint: Boolean, onToggleFingerprint: (use
 fun ToggleListView(useGrid: Boolean, onToggleUseGrid: () -> Unit) {
     val radioOptions = listOf("Grid", "List")
 
-    Text(text = stringResource(R.string.use_grid),
+    Text(
+        text = stringResource(R.string.use_grid),
         style = MaterialTheme.typography.labelLarge,
         modifier = Modifier.padding(top = 16.dp)
     )
 
     Column {
         radioOptions.forEach { text ->
-            Row( verticalAlignment = Alignment.CenterVertically,
+            Row(verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .fillMaxWidth()
                     .selectable(

@@ -7,6 +7,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.frogtest.movieguru.domain.repository.AuthRepository
 import com.frogtest.movieguru.domain.repository.MovieRepository
 import com.frogtest.movieguru.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -16,7 +17,8 @@ import javax.inject.Inject
 @HiltViewModel
 class MovieDetailsViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
-    private val repository: MovieRepository
+    private val repository: MovieRepository,
+    private val authRepository: AuthRepository
 ): ViewModel() {
 
     private val TAG = "MovieDetailsViewModel"
@@ -28,6 +30,8 @@ class MovieDetailsViewModel @Inject constructor(
 
         getMovieDetails(imdbID = imdbID)
     }
+
+    val getSignedInUser get() = authRepository.getSignedInUser()
 
     fun onEvent(event: MovieDetailsEvent) {
         when(event) {

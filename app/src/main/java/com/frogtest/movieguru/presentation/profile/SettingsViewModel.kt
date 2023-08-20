@@ -18,6 +18,7 @@ package com.frogtest.movieguru.presentation.profile
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.frogtest.movieguru.domain.repository.AuthRepository
 import com.frogtest.movieguru.domain.repository.UserSettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
@@ -30,6 +31,7 @@ import javax.inject.Inject
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val userDataRepository: UserSettingsRepository,
+    private val authRepository: AuthRepository,
 ) : ViewModel() {
     val settingsUiState: StateFlow<SettingsUiState> =
         userDataRepository.userSettings
@@ -55,6 +57,8 @@ class SettingsViewModel @Inject constructor(
                 initialValue = SettingsUiState.Loading,
             )
 
+    val getSignedInUser get() = authRepository.getSignedInUser()
+
     fun toggleUseGrid(useFingerPrint: Boolean) {
         viewModelScope.launch {
             userDataRepository.useGrid(useFingerPrint)
@@ -76,6 +80,12 @@ class SettingsViewModel @Inject constructor(
     fun updateDynamicColorPreference(useDynamicColor: Boolean) {
         viewModelScope.launch {
             userDataRepository.setDynamicColorPreference(useDynamicColor)
+        }
+    }
+
+    fun signOut() {
+        viewModelScope.launch {
+            authRepository.signOut()
         }
     }
 }

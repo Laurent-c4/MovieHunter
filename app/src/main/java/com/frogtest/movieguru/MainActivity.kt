@@ -1,8 +1,6 @@
 package com.frogtest.movieguru
 
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
@@ -11,34 +9,21 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.biometric.BiometricPrompt
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.core.content.ContextCompat
-import androidx.core.splashscreen.SplashScreen
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -51,22 +36,18 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import coil.compose.AsyncImage
 import com.frogtest.movieguru.navigation.Screen
-import com.frogtest.movieguru.presentation.sign_in.GoogleAuthUIClient
-import com.frogtest.movieguru.presentation.sign_in.SignInScreen
-import com.frogtest.movieguru.presentation.sign_in.SignInViewModel
 import com.frogtest.movieguru.presentation.movie_info.MovieDetailsScreen
 import com.frogtest.movieguru.presentation.movie_info.MovieDetailsViewModel
 import com.frogtest.movieguru.presentation.movies.MovieScreen
 import com.frogtest.movieguru.presentation.movies.MovieViewModel
 import com.frogtest.movieguru.presentation.profile.SettingsDialog
-import com.frogtest.movieguru.ui.theme.MovieGuruTheme
-import com.google.android.gms.auth.api.identity.Identity
-import com.frogtest.movieguru.preferences.SettingsDataStore
+import com.frogtest.movieguru.presentation.sign_in.SignInScreen
+import com.frogtest.movieguru.presentation.sign_in.SignInViewModel
 import com.frogtest.movieguru.presentation.sign_up.SignUpScreen
 import com.frogtest.movieguru.presentation.sign_up.SignUpViewModel
 import com.frogtest.movieguru.presentation.verify_email.VerifyEmailScreen
+import com.frogtest.movieguru.ui.theme.MovieGuruTheme
 import com.frogtest.movieguru.util.DarkThemeConfig
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import dagger.hilt.android.AndroidEntryPoint
@@ -74,15 +55,10 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import java.util.concurrent.Executor
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : FragmentActivity() {
     private val viewModel by viewModels<MainActivityViewModel>()
-
-    private val googleAuthUIClient by lazy {
-        GoogleAuthUIClient(context = applicationContext, oneTapClient = Identity.getSignInClient(applicationContext))
-    }
 
     private val TAG = "MainActivity"
 
@@ -125,6 +101,13 @@ class MainActivity : FragmentActivity() {
             val useGrid = shouldUseGrid(uiState = uiState)
             val useDynamicColor = useDynamicColor(uiState = uiState)
 
+            val showSettingsDialog = remember { mutableStateOf(false) }
+            if (showSettingsDialog.value) {
+                SettingsDialog(
+                    onDismiss = { showSettingsDialog.value = false },
+                )
+            }
+
             // Update the dark content of the system bars to match the theme
             DisposableEffect(systemUiController, darkTheme) {
                 systemUiController.systemBarsDarkContentEnabled = !darkTheme
@@ -150,104 +133,33 @@ class MainActivity : FragmentActivity() {
                         biometricsInitialised.value = true
                     }
 
-                    val showSettingsDialog = remember { mutableStateOf(false) }
-                    if (showSettingsDialog.value) {
-                        SettingsDialog(
-                            userProfile  = googleAuthUIClient.getSignedInUser(),
-                            onDismiss = { showSettingsDialog.value = false },
-                            onSignOut = {
-                                lifecycleScope.launch {
-                                    googleAuthUIClient.signOut()
-                                    navController.navigate(Screen.SignInScreen.route) {
-                                        popUpTo(navController.graph.id) { inclusive = true }
-                                    }
-                                }
+                    NavSetUp(navController = navController,
+                        useGrid =  useGrid,
+                        useFingerPrint = useFingerprint,
+                        showSettingsDialog = {showSettingsDialog.value = true}
+                    )
+                    AuthState(navController = navController)
 
-                                showSettingsDialog.value = false
-                            },
-                        )
-                  }
 
-                  Scaffold(
-                      modifier = Modifier.fillMaxSize(),
-                      topBar =
-                      {
-                          if (currentDestination != Screen.SignInScreen.route &&
-                              currentDestination != Screen.SignUpScreen.route &&
-                              currentDestination != Screen.ForgotPasswordScreen.route) {
-                              TopBar(currentDestination = currentDestination,
-                                  showSettingsDialog = showSettingsDialog,
-                                  onSearchClicked = {
-//                                      navController.navigate("search")
-                                  })
-                          }
-                      },
-                  ) { paddingValues ->
-                      NavSetUp(navController, paddingValues, useGrid, useFingerprint)
-
-                  }
-
+                }
             }
         }
-    } }
-
-    @Composable
-    @OptIn(ExperimentalMaterial3Api::class)
-    private fun TopBar(
-        currentDestination: String?,
-        showSettingsDialog: MutableState<Boolean>,
-        onSearchClicked: () -> Unit = {}
-    ) {
-        TopAppBar(
-            title = { Text(text = "Movie Guru") },
-            actions =
-            {
-
-                    // TODO:  Implement search
-//                    IconButton(onClick = { onSearchClicked() })
-//                    {
-//                        Icon(
-//                            imageVector = Icons.Default.Search,
-//                            contentDescription = "Search",
-//                            tint = MaterialTheme.colorScheme.onSurface
-//                        )
-//                    }
-
-                    IconButton(onClick = { showSettingsDialog.value = true })
-                    {
-                        if(googleAuthUIClient.getSignedInUser()?.photoUrl != null) {
-                        AsyncImage(
-                            model = googleAuthUIClient.getSignedInUser()?.photoUrl,
-                            contentDescription = "Profile",
-                            modifier = Modifier
-                                .clip(shape = CircleShape),
-                            contentScale = ContentScale.Crop,)
-                        } else {
-                            Icon(
-                                imageVector = Icons.Default.AccountCircle,
-                                contentDescription = "Profile",
-                                tint = MaterialTheme.colorScheme.onSurface
-                            )
-                        }
-                    }
-            }
-        )
     }
 
     @OptIn(ExperimentalComposeUiApi::class)
     @Composable
     private fun NavSetUp(
         navController: NavHostController,
-        paddingValues: PaddingValues,
         useGrid: Boolean,
-        useFingerPrint: Boolean
+        useFingerPrint: Boolean,
+        showSettingsDialog: () -> Unit = {}
     ) {
         NavHost(
             navController = navController,
             startDestination = Screen.SignInScreen.route,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues = paddingValues),
+//                .padding(paddingValues = paddingValues),
         ) {
 
             composable(Screen.SignInScreen.route) {
@@ -255,9 +167,12 @@ class MainActivity : FragmentActivity() {
                 val state by viewModel.state.collectAsStateWithLifecycle()
 
                 LaunchedEffect(key1 = Unit) {
-                    if (googleAuthUIClient.getSignedInUser() !== null) {
+                    if (viewModel.getSignedInUser !== null) {
                         if (viewModel.isEmailVerified) {
-                            checkBiometricsAndNavigate(navController = navController, useFingerprint = useFingerPrint)
+                            checkBiometricsAndNavigate(
+                                navController = navController,
+                                useFingerprint = useFingerPrint
+                            )
                         } else {
                             navController.navigate(Screen.VerifyEmailScreen.route) {
                                 popUpTo(navController.graph.id) { inclusive = true }
@@ -271,7 +186,7 @@ class MainActivity : FragmentActivity() {
                     onResult = { result ->
                         if (result.resultCode == RESULT_OK) {
                             lifecycleScope.launch {
-                                val signInResult = googleAuthUIClient.signInWithIntent(
+                                val signInResult = viewModel.googleSignInWithIntent(
                                     intent = result.data ?: return@launch
                                 )
                                 viewModel.onSignInResult(signInResult)
@@ -284,7 +199,10 @@ class MainActivity : FragmentActivity() {
                 LaunchedEffect(key1 = state.isSignInSuccessful) {
                     if (state.isSignInSuccessful) {
                         if (viewModel.isEmailVerified) {
-                            checkBiometricsAndNavigate(navController =  navController, useFingerprint = useFingerPrint)
+                            checkBiometricsAndNavigate(
+                                navController = navController,
+                                useFingerprint = useFingerPrint
+                            )
                             viewModel.resetState()
                         } else {
                             navController.navigate(Screen.VerifyEmailScreen.route) {
@@ -298,7 +216,7 @@ class MainActivity : FragmentActivity() {
                     state = state,
                     onGoogleSignInClick = {
                         lifecycleScope.launch {
-                            val signInIntentSender = googleAuthUIClient.signIn()
+                            val signInIntentSender = viewModel.googleSignInIntentSender()
                             launcher.launch(
                                 IntentSenderRequest.Builder(
                                     signInIntentSender ?: return@launch
@@ -310,28 +228,34 @@ class MainActivity : FragmentActivity() {
                         viewModel.signInWithEmailAndPassword(email, password)
                     },
                     navigateToForgotPasswordScreen = {
-                        Toast.makeText(applicationContext, "To be implemented", Toast.LENGTH_SHORT).show()},
-                    navigateToSignUpScreen = {navController.navigate(Screen.SignUpScreen.route) }
+                        Toast.makeText(applicationContext, "To be implemented", Toast.LENGTH_SHORT)
+                            .show()
+                    },
+                    navigateToSignUpScreen = { navController.navigate(Screen.SignUpScreen.route) }
                 )
             }
-            composable(Screen.VerifyEmailScreen.route){
-                VerifyEmailScreen(navigateToHomeScreen = { navController.navigate(Screen.MovieScreen.route) {
-                    popUpTo(navController.graph.id) { inclusive = true }
-                } })
+            composable(Screen.VerifyEmailScreen.route) {
+                VerifyEmailScreen(
+                    navigateToHomeScreen = {
+                    navController.navigate(Screen.MovieScreen.route) {
+                        popUpTo(navController.graph.id) { inclusive = true }
+                    }
+                }, showSettingsDialog = showSettingsDialog
+                )
             }
-            composable(Screen.SignUpScreen.route){
+            composable(Screen.SignUpScreen.route) {
                 val viewModel = hiltViewModel<SignUpViewModel>()
 
-                SignUpScreen(viewModel = viewModel, navigateBack = {navController.popBackStack()})
+                SignUpScreen(viewModel = viewModel, navigateBack = { navController.popBackStack() })
             }
             composable(Screen.MovieScreen.route) {
                 val viewModel = hiltViewModel<MovieViewModel>()
-                MovieScreen(navController = navController, viewModel = viewModel, useGrid = useGrid)
+                MovieScreen(navController = navController, viewModel = viewModel, useGrid = useGrid, showSettingsDialog = showSettingsDialog)
             }
             composable("movie/{imdbID}") { backStackEntry ->
                 val imdbID = backStackEntry.arguments?.getString("imdbID")
                 val viewModel = hiltViewModel<MovieDetailsViewModel>()
-                MovieDetailsScreen(imdbID = imdbID ?: "", viewModel = viewModel)
+                MovieDetailsScreen(imdbID = imdbID ?: "", viewModel = viewModel, showSettingsDialog = showSettingsDialog)
             }
         }
     }
@@ -425,7 +349,8 @@ class MainActivity : FragmentActivity() {
             else -> {
                 // Should never happen, but if it does, default to following the system
                 // dark theme setting.
-                isSystemInDarkTheme()}
+                isSystemInDarkTheme()
+            }
         }
     }
 
@@ -443,5 +368,23 @@ class MainActivity : FragmentActivity() {
     ): Boolean = when (uiState) {
         MainActivityUiState.Loading -> false
         is MainActivityUiState.Success -> uiState.userSettings.useFingerPrint
+    }
+
+    @Composable
+    private fun AuthState(
+        navController: NavHostController,
+    ) {
+        val isUserSignedOut = viewModel.getAuthState().collectAsState().value
+        val currentDestination = navController.currentBackStackEntry?.destination?.route
+        if (
+            isUserSignedOut &&
+            currentDestination != Screen.SignInScreen.route &&
+            currentDestination != Screen.SignUpScreen.route &&
+            currentDestination != Screen.ForgotPasswordScreen.route
+        ) {
+            navController.navigate(Screen.SignInScreen.route) {
+                popUpTo(navController.graph.id) { inclusive = true }
+            }
+        }
     }
 }
