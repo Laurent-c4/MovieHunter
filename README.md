@@ -11,6 +11,9 @@ This is a movie search app that allows users to search for movies and view the m
 * [Technologies](#technologies)
 * [Contributing](#contributing)
 
+## APK
+[Download](https://drive.google.com/uc?export=download&id=1KLiR054c6jntHNAAu6lb88SwhMCwf72B)
+
 ## Installation
 Clone the repo and open in Android Studio.
 
@@ -54,9 +57,6 @@ I used JAVA_VERSION=17. You may need to change  to this version of Java in your 
 ![Home(Grid)](https://github.com/Laurent-c4/MovieGuru/assets/43743544/1599fdfe-a6e4-427c-b017-9f2fbc27b167)
 ![Home(List)](https://github.com/Laurent-c4/MovieGuru/assets/43743544/0dc66cbb-afb3-49d2-bb8a-9a6095fbcd82)
 ![Movie Details](https://github.com/Laurent-c4/MovieGuru/assets/43743544/07fd45de-6cfc-4310-858c-c54ab51db21d)
-
-## APK
-[Download](https://drive.google.com/uc?export=download&id=1KLiR054c6jntHNAAu6lb88SwhMCwf72B)
 
 ## License
 This project is licensed under the MIT license.
