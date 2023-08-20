@@ -17,19 +17,19 @@ This is a movie search app that allows users to search for movies and view the m
 ## Installation
 Clone the repo and open in Android Studio.
 
-Add your API keys to the gradle.properties file. You can use the following API keys: 
-\`\`\`
+Add your API keys to your `local.properties` file. You can use the following API keys:
+
+```
 OMDB_API_KEY=a95b5205
 TMDB_API_KEY=09ad8ace66eec34302943272db0e8d2c
-\`\`\`
+```
 
-The link below contains additional API keys for OMDB and TMDB
-[Keys](https://github.com/rickylawson/freekeys/blob/master/index.js)
+The following link contains additional API keys for OMDB and TMDB. [Click to view API Keys](https://github.com/rickylawson/freekeys/blob/master/index.js)
 
-You also need a google-services.json file from Firebase. Click the link below for more information.
-[Google Services](https://firebase.google.com/docs/android/setup)
+You also need a google-services.json file from Firebase. Click [Google Services](https://firebase.google.com/docs/android/setup)  for more information.
 
-I used JAVA_VERSION=17. You may need to change  to this version of Java in your Android Studio settings.
+
+I used `JAVA_VERSION=17`. You may need to change  to this version of Java in your Android Studio settings.
 
 ## Features
 * Authentication with Firebase - Google and Email/Password
