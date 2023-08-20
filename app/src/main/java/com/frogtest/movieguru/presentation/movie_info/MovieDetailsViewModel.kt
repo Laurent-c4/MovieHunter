@@ -106,7 +106,7 @@ class MovieDetailsViewModel @Inject constructor(
                             state = state.copy(
                                 errorVideos = result.errorMessage ?: "An unexpected error occurred",
                                 isLoadingVideos = false,
-                                movieDetails = null
+                                movieVideos = emptyList()
                             )
 
                         }
