@@ -422,14 +422,19 @@ class MainActivity : FragmentActivity() {
     ) {
         val isUserSignedOut = viewModel.getAuthState().collectAsState().value
         val currentDestination = navController.currentBackStackEntry?.destination?.route
-        if (
-            isUserSignedOut &&
-            currentDestination != Screen.SignInScreen.route &&
-            currentDestination != Screen.SignUpScreen.route &&
-            currentDestination != Screen.ForgotPasswordScreen.route
-        ) {
-            navController.navigate(Screen.SignInScreen.route) {
-                popUpTo(navController.graph.id) { inclusive = true }
+
+        currentDestination?.let {
+            if (
+                isUserSignedOut &&
+                currentDestination != Screen.SignInScreen.route &&
+                currentDestination != Screen.SignUpScreen.route &&
+                currentDestination != Screen.ForgotPasswordScreen.route
+            ) {
+
+                Log.d(TAG, "AuthState: $currentDestination")
+                navController.navigate(Screen.SignInScreen.route) {
+                    popUpTo(navController.graph.id) { inclusive = true }
+                }
             }
         }
     }
