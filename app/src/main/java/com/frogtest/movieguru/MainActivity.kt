@@ -100,13 +100,8 @@ class MainActivity : FragmentActivity() {
             val useFingerprint = shouldUseFingerPrint(uiState = uiState)
             val useGrid = shouldUseGrid(uiState = uiState)
             val useDynamicColor = useDynamicColor(uiState = uiState)
-
             val showSettingsDialog = remember { mutableStateOf(false) }
-            if (showSettingsDialog.value) {
-                SettingsDialog(
-                    onDismiss = { showSettingsDialog.value = false },
-                )
-            }
+
 
             // Update the dark content of the system bars to match the theme
             DisposableEffect(systemUiController, darkTheme) {
@@ -138,7 +133,14 @@ class MainActivity : FragmentActivity() {
                         useFingerPrint = useFingerprint,
                         showSettingsDialog = {showSettingsDialog.value = true}
                     )
+
                     AuthState(navController = navController)
+
+                    if (showSettingsDialog.value) {
+                        SettingsDialog(
+                            onDismiss = { showSettingsDialog.value = false },
+                        )
+                    }
 
 
                 }
