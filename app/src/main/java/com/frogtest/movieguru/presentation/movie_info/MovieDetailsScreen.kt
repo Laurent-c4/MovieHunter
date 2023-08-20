@@ -1,5 +1,6 @@
 package com.frogtest.movieguru.presentation.movie_info
 
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -7,21 +8,18 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.KeyboardArrowRight
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -36,7 +34,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import androidx.paging.LoadState
 import coil.compose.AsyncImage
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
@@ -51,10 +48,14 @@ fun MovieDetailsScreen(
     showSettingsDialog: () -> Unit,
 ) {
 
+    val TAG = "MovieDetailsScreen"
+
     val pagerState = rememberPagerState()
     val scope = rememberCoroutineScope()
     val state = viewModel.state
     val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = state.isLoading)
+
+    Log.d(TAG, "MovieDetailsScreen: ${state.movieDetails})")
 
 
     Scaffold(
@@ -88,9 +89,9 @@ fun MovieDetailsScreen(
                         ) {
                             state.movieDetails?.let { movieDetails ->
                                 item {
-                                    movieDetails.poster?.let {
+                                    movieDetails.poster?.let { poster ->
                                         AsyncImage(
-                                            model = it,
+                                            model = poster,
                                             contentDescription = "Poster",
                                             modifier = Modifier
                                                 .height(250.dp)
@@ -103,9 +104,9 @@ fun MovieDetailsScreen(
                                 }
 
                                 item {
-                                    movieDetails.title?.let {
+                                    movieDetails.title?.let {title ->
                                         Text(
-                                            text = it,
+                                            text = title,
                                             style = MaterialTheme.typography.titleLarge,
                                         )
                                     }
@@ -116,9 +117,9 @@ fun MovieDetailsScreen(
                                 }
 
                                 item {
-                                    movieDetails.plot?.let {
+                                    movieDetails.plot?.let {plot ->
                                         Text(
-                                            text = it,
+                                            text = plot,
                                             Modifier.padding(start = 8.dp, end = 8.dp)
                                         )
                                     }
@@ -129,9 +130,9 @@ fun MovieDetailsScreen(
                                 }
 
                                 item {
-                                    movieDetails.imdbRating?.let {
+                                    movieDetails.imdbRating?.let {rating ->
                                         Text(
-                                            text = "IMDB Rating: $it",
+                                            text = "IMDB Rating: $rating",
                                             Modifier.padding(start = 8.dp, end = 8.dp)
                                         )
                                     }
@@ -142,9 +143,9 @@ fun MovieDetailsScreen(
                                 }
 
                                 item {
-                                    movieDetails.released?.let {
+                                    movieDetails.released?.let {released ->
                                         Text(
-                                            text = "Released: $it",
+                                            text = "Released: $released",
                                             Modifier.padding(start = 8.dp, end = 8.dp)
                                         )
                                     }
@@ -155,9 +156,9 @@ fun MovieDetailsScreen(
                                 }
 
                                 item {
-                                    movieDetails.actors?.let {
+                                    movieDetails.actors?.let {actors ->
                                         Text(
-                                            text = "Cast: $it",
+                                            text = "Cast: $actors",
                                             Modifier.padding(start = 8.dp, end = 8.dp)
                                         )
                                     }
@@ -171,7 +172,7 @@ fun MovieDetailsScreen(
                         }
                     }
 
-                    val ytVideos = state.movieVideos.filter { it.site == "YouTube" }
+                    val ytVideos = state.movieVideos.filter {videos ->  videos.site == "YouTube" }
 
                     AnimatedVisibility(
                         visible = ytVideos.isNotEmpty(),
