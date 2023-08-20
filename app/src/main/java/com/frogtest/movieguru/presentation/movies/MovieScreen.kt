@@ -62,7 +62,6 @@ fun MovieScreen(
     }
 
 
-
     val showSearchBar = remember { mutableStateOf(false) }
 
     LaunchedEffect(key1 = movies.loadState) {
@@ -110,21 +109,35 @@ fun MovieScreen(
         ) {
             if (movies.loadState.refresh is LoadState.Loading) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-            } else if (movies.loadState.refresh is LoadState.Error && movies.itemCount == 0) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = (movies.loadState.refresh as LoadState.Error).error.message
-                            ?: "An unexpected error occurred",
-                        color = MaterialTheme.colorScheme.error
-                    )
-                    Button(onClick = { movies.refresh() }) {
-                        Text(text = "Retry")
+            } else if (movies.itemCount == 0) {
+                if (movies.loadState.refresh is LoadState.Error) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = (movies.loadState.refresh as LoadState.Error).error.message
+                                ?: "An unexpected error occurred",
+                            color = MaterialTheme.colorScheme.error
+                        )
+                        Button(onClick = { movies.refresh() }) {
+                            Text(text = "Retry")
+                        }
+                    }
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "No Results",
+                            color = MaterialTheme.colorScheme.error
+                        )
                     }
                 }
             } else {
