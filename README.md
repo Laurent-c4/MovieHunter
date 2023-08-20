@@ -12,7 +12,7 @@ This is a movie search app that allows users to search for movies and view the m
 * [Contributing](#contributing)
 
 ## APK
-[Download](https://drive.google.com/uc?export=download&id=1EczhvfKy_h-o7iqac4AJrGGwTEn2bl2i)
+[Download](https://drive.google.com/uc?export=download&id=1_DTwnoByliiD5d1PrWnyW5F641jHvo1e)
 
 ## Installation
 Clone the repo and open in Android Studio.
@@ -45,7 +45,6 @@ I used JAVA_VERSION=17. You may need to change  to this version of Java in your 
 * Support for multiple screen sizes and orientations
 * Add favorite movies to a list
 * Implement movie recommendations (ML/AI)
-* Connectivity Monitor
 
 ## Technologies
 * Jetpack Compose
