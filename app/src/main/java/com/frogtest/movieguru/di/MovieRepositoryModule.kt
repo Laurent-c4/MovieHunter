@@ -3,7 +3,6 @@ package com.frogtest.movieguru.di
 import com.frogtest.movieguru.data.repository.AuthRepositoryImpl
 import com.frogtest.movieguru.data.repository.MovieRepositoryImpl
 import com.frogtest.movieguru.data.repository.UserSettingsRepositoryImpl
-import com.frogtest.movieguru.domain.repository.AuthRepository
 import com.frogtest.movieguru.domain.repository.MovieRepository
 import com.frogtest.movieguru.domain.repository.UserSettingsRepository
 import dagger.Binds

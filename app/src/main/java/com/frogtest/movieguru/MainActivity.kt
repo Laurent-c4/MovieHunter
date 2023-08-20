@@ -1,6 +1,7 @@
 package com.frogtest.movieguru
 
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
@@ -9,9 +10,15 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.biometric.BiometricPrompt
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -23,6 +30,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.fragment.app.FragmentActivity
@@ -49,18 +57,23 @@ import com.frogtest.movieguru.presentation.sign_up.SignUpViewModel
 import com.frogtest.movieguru.presentation.verify_email.VerifyEmailScreen
 import com.frogtest.movieguru.ui.theme.MovieGuruTheme
 import com.frogtest.movieguru.util.DarkThemeConfig
+import com.frogtest.movieguru.util.ConnectivityObserver
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import java.util.concurrent.Executor
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : FragmentActivity() {
     private val viewModel by viewModels<MainActivityViewModel>()
 
     private val TAG = "MainActivity"
+
+    @Inject
+    lateinit var connectivityObserver: ConnectivityObserver
 
     private lateinit var executor: Executor
     private lateinit var biometricPrompt: BiometricPrompt
@@ -101,6 +114,12 @@ class MainActivity : FragmentActivity() {
             val useGrid = shouldUseGrid(uiState = uiState)
             val useDynamicColor = useDynamicColor(uiState = uiState)
             val showSettingsDialog = remember { mutableStateOf(false) }
+            val snackbarHostState = remember { SnackbarHostState() }
+
+            val status by connectivityObserver.observe().collectAsState(
+                initial = ConnectivityObserver.Status.Unavailable
+            )
+            val isOffline = status != ConnectivityObserver.Status.Available
 
 
             // Update the dark content of the system bars to match the theme
@@ -128,11 +147,17 @@ class MainActivity : FragmentActivity() {
                         biometricsInitialised.value = true
                     }
 
-                    NavSetUp(navController = navController,
-                        useGrid =  useGrid,
-                        useFingerPrint = useFingerprint,
-                        showSettingsDialog = {showSettingsDialog.value = true}
-                    )
+                    Scaffold(
+                        snackbarHost = { SnackbarHost(snackbarHostState) },
+                    ) {
+                        Box(modifier = Modifier.padding(it))
+                        NavSetUp(
+                            navController = navController,
+                            useGrid = useGrid,
+                            useFingerPrint = useFingerprint,
+                            showSettingsDialog = { showSettingsDialog.value = true },
+                        )
+                    }
 
                     AuthState(navController = navController)
 
@@ -142,6 +167,16 @@ class MainActivity : FragmentActivity() {
                         )
                     }
 
+                    // If user is not connected to the internet show a snack bar to inform them.
+                    val notConnectedMessage = stringResource(R.string.not_connected)
+                    LaunchedEffect(isOffline) {
+                        if (isOffline) {
+                            snackbarHostState.showSnackbar(
+                                message = notConnectedMessage,
+                                duration = SnackbarDuration.Indefinite,
+                            )
+                        }
+                    }
 
                 }
             }
@@ -239,10 +274,10 @@ class MainActivity : FragmentActivity() {
             composable(Screen.VerifyEmailScreen.route) {
                 VerifyEmailScreen(
                     navigateToHomeScreen = {
-                    navController.navigate(Screen.MovieScreen.route) {
-                        popUpTo(navController.graph.id) { inclusive = true }
-                    }
-                }, showSettingsDialog = showSettingsDialog
+                        navController.navigate(Screen.MovieScreen.route) {
+                            popUpTo(navController.graph.id) { inclusive = true }
+                        }
+                    }, showSettingsDialog = showSettingsDialog
                 )
             }
             composable(Screen.SignUpScreen.route) {
@@ -252,12 +287,21 @@ class MainActivity : FragmentActivity() {
             }
             composable(Screen.MovieScreen.route) {
                 val viewModel = hiltViewModel<MovieViewModel>()
-                MovieScreen(navController = navController, viewModel = viewModel, useGrid = useGrid, showSettingsDialog = showSettingsDialog)
+                MovieScreen(
+                    navController = navController,
+                    viewModel = viewModel,
+                    useGrid = useGrid,
+                    showSettingsDialog = showSettingsDialog
+                )
             }
             composable("movie/{imdbID}") { backStackEntry ->
                 val imdbID = backStackEntry.arguments?.getString("imdbID")
                 val viewModel = hiltViewModel<MovieDetailsViewModel>()
-                MovieDetailsScreen(imdbID = imdbID ?: "", viewModel = viewModel, showSettingsDialog = showSettingsDialog)
+                MovieDetailsScreen(
+                    imdbID = imdbID ?: "",
+                    viewModel = viewModel,
+                    showSettingsDialog = showSettingsDialog
+                )
             }
         }
     }

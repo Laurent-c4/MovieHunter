@@ -8,6 +8,8 @@ import com.frogtest.movieguru.data.network.api.OMDBMovieAPI
 import com.frogtest.movieguru.data.network.api.TMDBMovieAPI
 import com.frogtest.movieguru.data.repository.AuthRepositoryImpl
 import com.frogtest.movieguru.domain.repository.AuthRepository
+import com.frogtest.movieguru.util.ConnectivityObserver
+import com.frogtest.movieguru.util.NetworkConnectivityObserver
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import dagger.Module
@@ -65,5 +67,10 @@ object AppModule {
         auth = Firebase.auth,
         context = context,
     )
+
+    @Provides
+    fun provideConnectivityObserver(@ApplicationContext context: Context): ConnectivityObserver {
+        return NetworkConnectivityObserver(context)
+    }
 
 }
