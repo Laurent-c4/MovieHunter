@@ -7,18 +7,17 @@ import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import androidx.room.withTransaction
 import com.frogtest.movieguru.data.cache.MovieDatabase
-import com.frogtest.movieguru.data.cache.entity.MovieEntity
-import com.frogtest.movieguru.data.cache.entity.MovieRemoteKeyEntity
+import com.frogtest.movieguru.data.cache.entity.movie.MovieEntity
+import com.frogtest.movieguru.data.cache.entity.movie.MovieRemoteKeyEntity
 import com.frogtest.movieguru.data.mappers.toMovieEntity
-import com.frogtest.movieguru.data.network.api.OMDBMovieAPI
-import com.frogtest.movieguru.data.network.dto.MovieDto
-import javax.inject.Inject
+import com.frogtest.movieguru.data.network.api.TMDBMovieAPI
+
 
 private const val TAG = "MovieNetworkMediator"
 
 @OptIn(ExperimentalPagingApi::class)
 class MovieNetworkMediator(
-    private val OMDBMovieApi: OMDBMovieAPI,
+    private val movieApi: TMDBMovieAPI,
     private val movieDb: MovieDatabase,
     private val sort: Boolean = false,
     private val query: String
@@ -56,7 +55,7 @@ class MovieNetworkMediator(
                 }
             }
 
-            val response = OMDBMovieApi.getMovies(page = currentPage, title = query ).data?: emptyList()
+            val response = movieApi.getTrendingMovies(page = currentPage).results?: emptyList()
 
             val endOfPaginationReached = response.isEmpty()
 
@@ -69,19 +68,13 @@ class MovieNetworkMediator(
                     remoteKeyDao.deleteAllRemoteKeys()
                 }
 
-                val keys =  if (sort) {
-                   dirtyFix(response)
-                } else
-                    response.map { movieDto ->
+                val keys = response.map { movieDto ->
                     MovieRemoteKeyEntity(
-                        id = movieDto.imdbID,
-                        year = movieDto.year,
+                        id = movieDto.id,
                         prevPage = prevPage,
                         nextPage = nextPage
                     ) }
 
-
-                remoteKeyDao.deleteAllRemoteKeys()
                 remoteKeyDao.addAllRemoteKeys(remoteKeys = keys)
                 movieDao.insertAll(movies = response.map { it.toMovieEntity() })
             }
@@ -95,7 +88,7 @@ class MovieNetworkMediator(
         state: PagingState<Int, MovieEntity>
     ): MovieRemoteKeyEntity? {
         return state.anchorPosition?.let { position ->
-            state.closestItemToPosition(position)?.imdbID?.let { id ->
+            state.closestItemToPosition(position)?.id?.let { id ->
                 remoteKeyDao.getRemoteKey(id = id)
             }
         }
@@ -106,7 +99,7 @@ class MovieNetworkMediator(
     ): MovieRemoteKeyEntity? {
         return state.pages.firstOrNull { it.data.isNotEmpty() }?.data?.firstOrNull()
             ?.let { movieEntity ->
-                remoteKeyDao.getRemoteKey(id = movieEntity.imdbID)
+                remoteKeyDao.getRemoteKey(id = movieEntity.id)
             }
     }
 
@@ -115,46 +108,8 @@ class MovieNetworkMediator(
     ): MovieRemoteKeyEntity? {
         return state.pages.lastOrNull { it.data.isNotEmpty() }?.data?.lastOrNull()
             ?.let { movieEntity ->
-                remoteKeyDao.getRemoteKey(id = movieEntity.imdbID)
+                remoteKeyDao.getRemoteKey(id = movieEntity.id)
             }
     }
 
-    private suspend fun dirtyFix(response: List<MovieDto>): List<MovieRemoteKeyEntity>{
-        //get all keys from DB
-        val keysdb = remoteKeyDao.getAllRemoteKeys()
-
-        //append keys from API
-
-        val keysAPI = response.map { movieDto ->
-            MovieRemoteKeyEntity(
-                id = movieDto.imdbID,
-                year = movieDto.year,
-                prevPage = null,
-                nextPage = null
-            )
-        }
-
-        //append keys from API to DB
-
-        val newKeys = keysdb.toMutableList()
-
-        newKeys.addAll(keysAPI)
-
-        //sort keys
-
-        val finalKeys = newKeys.sortedBy { it.year }
-
-        //modify prev and next page using pagination 10
-       return  finalKeys.mapIndexed { index, movieRemoteKeyEntity ->
-            MovieRemoteKeyEntity(
-                id = movieRemoteKeyEntity.id,
-                prevPage = if(index / 10 == 0) null else index / 10,
-                nextPage =  index /10 + 2,
-                year = movieRemoteKeyEntity.year
-            )
-        }
-
-
-
-    }
 }

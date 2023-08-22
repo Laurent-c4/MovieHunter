@@ -1,24 +1,28 @@
 package com.frogtest.movieguru.presentation.movies
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Card
 import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.frogtest.movieguru.domain.model.Movie
+import coil.compose.AsyncImagePainter
+import com.frogtest.movieguru.R
+import com.frogtest.movieguru.domain.model.movie.Movie
 import com.frogtest.movieguru.ui.theme.MovieGuruTheme
 
 @Composable
@@ -26,47 +30,46 @@ fun MovieGridItem(
     movie: Movie,
     modifier: Modifier = Modifier
 ) {
+
+    Box(modifier = modifier) {
+
         Column(
             modifier = modifier
-                .padding(start = 4.dp, end = 4.dp)
         ) {
             AsyncImage(
-                model = movie.poster,
+                model = "https://image.tmdb.org/t/p/original/${movie.posterPath}",
                 contentDescription = movie.title,
                 modifier = Modifier
-                    .height(250.dp)
-                )
+                    .height(190.dp),
+                placeholder = painterResource(id = R.drawable.baseline_image_24),
+            )
 
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Text(
+                text = movie.title,
+                style = MaterialTheme.typography.titleSmall,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+
+            Spacer(modifier = Modifier.height(4.dp))
 
             Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight(1f)
+                modifier = modifier,
+//                verticalArrangement = Arrangement.Bottom
             ) {
                 Text(
-                    text = movie.title,
-                    style = MaterialTheme.typography.titleMedium,
-                    maxLines = 3,
+                    text = movie.releaseDate,
+                    style = MaterialTheme.typography.bodySmall,
                 )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = movie.year,
-                    style = MaterialTheme.typography.bodySmall
-                )
+
             }
+//            Divider()
         }
 
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .fillMaxHeight(1f)
-            .padding(4.dp),
-        verticalArrangement = Arrangement.Bottom
-    ) {
-
-        Divider(
-        )
     }
+
 
 }
 
@@ -74,14 +77,7 @@ fun MovieGridItem(
 @Composable
 fun MovieGridItemPreview() {
     MovieGuruTheme {
-        MovieGridItem(
-            movie = Movie(
-                imdbID = "tt0372784",
-                title = "Batman Begins",
-                year = "2005",
-                poster = "https://m.media-amazon.com/images/M/MV5BMjUyNzRhOWItMTViOS00NGQ0LTg0MjktOGQ0YWU2MmM3Mzc3XkEyXkFqcGdeQXVyNDQwMTQ5ODk@._V1_SX300.jpg",
-                type = "movie"
-            )
-        )
+
+
     }
 }

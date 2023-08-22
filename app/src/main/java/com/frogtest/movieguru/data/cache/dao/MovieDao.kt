@@ -5,30 +5,26 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.frogtest.movieguru.data.cache.entity.MovieEntity
+import androidx.room.Upsert
+import com.frogtest.movieguru.data.cache.entity.movie.MovieEntity
 
 @Dao
 interface MovieDao {
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Upsert
     suspend fun insertAll(movies: List<MovieEntity>)
 
-    // Select movies with release date greater that 2000
-    @Query("SELECT * FROM MovieEntity"
-            + " WHERE year > 2000"
-            + " ORDER BY year ASC"
-    )
-    fun getSortedMovies(): PagingSource<Int, MovieEntity>
 
-    @Query("SELECT * FROM MovieEntity"
-            + " WHERE year > 2000"
-    )
+    @Query("SELECT * FROM movies")
     fun getMovies(): PagingSource<Int, MovieEntity>
 
+    @Query("SELECT * FROM movies WHERE id LIKE :id")
+    suspend fun getMovie(id: Int): MovieEntity?
+
    //Get item count
-    @Query("SELECT COUNT(*) FROM MovieEntity")
+    @Query("SELECT COUNT(*) FROM movies")
     suspend fun getCount(): Int
 
-    @Query("DELETE FROM MovieEntity")
+    @Query("DELETE FROM movies")
     suspend fun clearAll()
 }

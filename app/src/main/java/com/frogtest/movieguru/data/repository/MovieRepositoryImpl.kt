@@ -6,16 +6,15 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import com.frogtest.movieguru.data.cache.MovieDatabase
-import com.frogtest.movieguru.data.cache.entity.MovieEntity
+import com.frogtest.movieguru.data.cache.entity.movie.MovieEntity
+import com.frogtest.movieguru.data.mappers.toMovie
 import com.frogtest.movieguru.data.mappers.toMovieDetails
 import com.frogtest.movieguru.data.mappers.toMovieDetailsEntity
-import com.frogtest.movieguru.data.mappers.toMovieVideo
-import com.frogtest.movieguru.data.mappers.toMovieVideoEntity
 import com.frogtest.movieguru.data.network.MovieNetworkMediator
 import com.frogtest.movieguru.data.network.api.OMDBMovieAPI
 import com.frogtest.movieguru.data.network.api.TMDBMovieAPI
-import com.frogtest.movieguru.domain.model.MovieDetails
-import com.frogtest.movieguru.domain.model.MovieVideo
+import com.frogtest.movieguru.domain.model.movie.Movie
+import com.frogtest.movieguru.domain.model.movie_details.MovieDetails
 import com.frogtest.movieguru.domain.repository.MovieRepository
 import com.frogtest.movieguru.util.Resource
 import kotlinx.coroutines.flow.Flow
@@ -25,21 +24,22 @@ import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton class MovieRepositoryImpl @Inject constructor(
+@Singleton
+class MovieRepositoryImpl @Inject constructor(
     val omDBApi: OMDBMovieAPI,
     val tmDBApi: TMDBMovieAPI,
     val movieDatabase: MovieDatabase
-): MovieRepository {
+) : MovieRepository {
 
     private val TAG = "MovieRepositoryImpl"
 
     @OptIn(ExperimentalPagingApi::class)
     override fun getMovies(sort: Boolean, query: String): Flow<PagingData<MovieEntity>> {
-        val pagingSourceFactory = if (sort){ {movieDatabase.movieDao.getSortedMovies()} } else { {movieDatabase.movieDao.getMovies()} }
+        val pagingSourceFactory = { movieDatabase.movieDao.getMovies() }
         return Pager(
-            config = PagingConfig(pageSize = 10),
+            config = PagingConfig(pageSize = 20),
             remoteMediator = MovieNetworkMediator(
-                OMDBMovieApi = omDBApi,
+                movieApi = tmDBApi,
                 movieDb = movieDatabase,
                 sort = sort,
                 query = query
@@ -48,16 +48,36 @@ import javax.inject.Singleton
         ).flow
     }
 
+    override suspend fun getMovie(
+        id: Int
+    ): Flow<Resource<Movie>> {
+        return flow {
+            emit(Resource.Loading(true))
+
+            Log.d(TAG, "id: $id")
+
+            val cacheMovie = movieDatabase.movieDao.getMovie(id)
+
+            if (cacheMovie == null) {
+                emit(Resource.Error("Movie not found"))
+                return@flow
+            }
+            emit(Resource.Success(cacheMovie.toMovie()))
+            emit(Resource.Loading(false))
+        }
+    }
+
     override suspend fun getMovieDetails(
         fetchFromNetwork: Boolean,
-        imdbID: String
+        id: Int,
+        type: String
     ): Flow<Resource<MovieDetails>> {
         return flow {
             emit(Resource.Loading(true))
 
-            Log.d(TAG, "imdbID: $imdbID")
+            Log.d(TAG, "imdbID: $id")
 
-            val cacheMovieDetails = movieDatabase.movieDetailsDao.getMovieDetails(imdbID)
+            val cacheMovieDetails = movieDatabase.movieDetailsDao.getMovieDetails(id)
             cacheMovieDetails?.let {
                 emit(Resource.Success(cacheMovieDetails.toMovieDetails()))
             }
@@ -71,21 +91,7 @@ import javax.inject.Singleton
             }
 
             val networkMovieDetails = try {
-                val response = omDBApi.getMovieDetails(imdbID = imdbID)
-
-                // TMDBID will be used to get the movie videos
-                try {
-                val tmDBDetails = tmDBApi.getMovieDetails(externalID = imdbID)
-
-                if (tmDBDetails.movieResults.isNotEmpty()){
-                    Log.d(TAG, "getMovieDetails: ${tmDBDetails.movieResults[0].id}")
-                    response.tmdbID = tmDBDetails.movieResults[0].id
-                }
-                }
-                catch(e: Exception){
-                    e.printStackTrace()
-                    response.tmdbID = null
-                }
+                val response = tmDBApi.getMovieDetails(id = id, type = type)
 
                 response
 
@@ -100,66 +106,15 @@ import javax.inject.Singleton
             }
 
             networkMovieDetails?.let {
-                movieDatabase.movieDetailsDao.deleteMovieDetails(imdbID)
+                movieDatabase.movieDetailsDao.deleteMovieDetails(id)
                 movieDatabase.movieDetailsDao.insertMovieDetails(it.toMovieDetailsEntity())
             }
 
-            val data = movieDatabase.movieDetailsDao.getMovieDetails(imdbID)
+            val data = movieDatabase.movieDetailsDao.getMovieDetails(id)
             if (data == null) {
                 emit(Resource.Error("An error occurred"))
             } else {
                 emit(Resource.Success(data.toMovieDetails()))
-            }
-
-            emit(Resource.Loading(false))
-        }
-    }
-
-    override suspend fun getMovieVideos(
-        fetchFromNetwork: Boolean,
-        tmdbID: Int
-    ): Flow<Resource<List<MovieVideo>>> {
-        return flow {
-            emit(Resource.Loading(true))
-
-            val cacheMovieVideos = movieDatabase.movieVideoDao.getMovieVideos(tmdbID)
-            emit(Resource.Success(cacheMovieVideos.map { it.toMovieVideo() }))
-
-
-            val isNotInCache = cacheMovieVideos.isEmpty()
-            val shouldJustLoadFromCache = !fetchFromNetwork && !isNotInCache
-            if (shouldJustLoadFromCache) {
-                emit(Resource.Loading(false))
-                return@flow
-            }
-
-            val networkMovieVideos = try {
-                tmDBApi.getMovieVideos(tmdbID = tmdbID)
-            } catch (e: IOException) {
-                e.printStackTrace()
-                emit(Resource.Error(e.message ?: "An error occurred"))
-                null
-            } catch (e: HttpException) {
-                e.printStackTrace()
-                emit(Resource.Error(e.message ?: "An error occurred"))
-                null
-            }
-
-            networkMovieVideos?.let {
-                val movieVideos = it.results.map { movieVideo ->
-                    movieVideo.tmdbID = tmdbID
-                    movieVideo.toMovieVideoEntity()
-                }
-
-                movieDatabase.movieVideoDao.deleteMovieVideos(tmdbID)
-                movieDatabase.movieVideoDao.insertAll(movieVideos)
-            }
-
-            val data = movieDatabase.movieVideoDao.getMovieVideos(tmdbID).map { it.toMovieVideo() }
-            if (data.isEmpty()) {
-                emit(Resource.Error("No trailers available"))
-            } else {
-                emit(Resource.Success(data))
             }
 
             emit(Resource.Loading(false))

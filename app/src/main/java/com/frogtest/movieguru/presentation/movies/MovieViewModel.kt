@@ -8,7 +8,7 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.map
 import com.frogtest.movieguru.data.mappers.toMovie
-import com.frogtest.movieguru.domain.model.Movie
+import com.frogtest.movieguru.domain.model.movie.Movie
 import com.frogtest.movieguru.domain.repository.AuthRepository
 import com.frogtest.movieguru.domain.repository.MovieRepository
 import com.frogtest.movieguru.domain.repository.UserSettingsRepository
@@ -70,7 +70,7 @@ class MovieViewModel @Inject constructor(
                     updateSearchQuery(event.query)
                     searchJob?.cancel()
                     searchJob = viewModelScope.launch {
-                        getMovies(userSettingsRepository.userSettings.first().sort, event.query)
+//                        getMovies(userSettingsRepository.userSettings.first().sort, event.query)
                     }
                 }
             }
@@ -78,13 +78,13 @@ class MovieViewModel @Inject constructor(
             is MovieEvent.OnSortToggled -> {
                 viewModelScope.launch {
                     userSettingsRepository.toggleSort(event.sort)
-                    getMovies(event.sort, searchQuery.value)
+//                    getMovies(event.sort, searchQuery.value)
                 }
             }
 
             is MovieEvent.OnSearchInitiated -> {
                 viewModelScope.launch {
-                    getMovies(userSettingsRepository.userSettings.first().sort, searchQuery.value)
+//                    getMovies(userSettingsRepository.userSettings.first().sort, searchQuery.value)
                 }
             }
         }
@@ -92,7 +92,7 @@ class MovieViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            getMovies(userSettingsRepository.userSettings.first().sort, searchQuery.value)
+            getMovies()
         }
     }
 
@@ -102,13 +102,9 @@ class MovieViewModel @Inject constructor(
     }
 
 
-    fun getMovies(sort: Boolean, query: String) {
-        Log.d(TAG, "getMovies: $query")
+    fun getMovies() {
         viewModelScope.launch {
-            repository.getMovies(
-                sort = sort,
-                query = query.ifBlank { "love" }
-            ).map { pagingData ->
+            repository.getMovies().map { pagingData ->
                 pagingData.map { movieEntity ->
                     movieEntity.toMovie()
                 }

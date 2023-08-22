@@ -1,16 +1,15 @@
 package com.frogtest.movieguru.presentation.movie_info
 
-import com.frogtest.movieguru.domain.model.MovieDetails
-import com.frogtest.movieguru.domain.model.MovieVideo
+import com.frogtest.movieguru.domain.model.movie_details.MovieDetails
+import com.frogtest.movieguru.domain.model.movie.Movie
 
 data class MovieDetailsState(
     val isLoading: Boolean = false,
     val isRefreshing: Boolean = false,
-    val movieDetails: MovieDetails? = null,
+    val movie: Movie? = null,
     val error: String? = null,
 
-    val isLoadingVideos: Boolean = false,
-    val movieVideos: List<MovieVideo> = emptyList(),
-    val errorVideos: String? = null
+    val movieDetails: MovieDetails? = null,
+
 
 )

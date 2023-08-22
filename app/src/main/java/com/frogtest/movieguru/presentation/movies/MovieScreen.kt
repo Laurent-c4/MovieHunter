@@ -8,7 +8,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -175,11 +178,11 @@ fun MovieScreen(
 //                }
                     if (useGrid)
                         LazyVerticalGrid(
-                            columns = GridCells.Adaptive(minSize = 128.dp)
+                            columns = GridCells.Adaptive(minSize = 128.dp),
                         ) {
                             items(
                                 count = movies.itemCount,
-                                key = movies.itemKey { it.imdbID },
+                                key = movies.itemKey { it.id },
                                 contentType = movies.itemContentType { it }
                             ) { index ->
 
@@ -189,9 +192,11 @@ fun MovieScreen(
                                     MovieGridItem(
                                         movie = it,
                                         modifier = Modifier
-                                            .fillMaxSize()
+//                                            .height(270.dp)
+                                            .fillMaxHeight()
+                                            .padding(start = 1.dp, end = 1.dp, bottom = 5.dp)
                                             .clickable {
-                                                navController.navigate("movie/${it.imdbID}")
+                                                navController.navigate("movie/${it.id}")
                                             }
                                     )
                                 }
@@ -209,7 +214,7 @@ fun MovieScreen(
                         ) {
                             items(
                                 count = movies.itemCount,
-                                key = movies.itemKey { it.imdbID }
+                                key = movies.itemKey { it.id }
                             ) {
                                 val item = movies[it]
 
@@ -219,7 +224,7 @@ fun MovieScreen(
                                         modifier = Modifier
                                             .fillMaxSize()
                                             .clickable {
-                                                navController.navigate("movie/${item.imdbID}")
+                                                navController.navigate("movie/${item.id}")
                                             }
                                     )
                             }

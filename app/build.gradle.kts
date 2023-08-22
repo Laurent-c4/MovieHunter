@@ -136,6 +136,9 @@ dependencies {
     //Swipe Refresh
     implementation ("com.google.accompanist:accompanist-swiperefresh:0.19.0")
 
+    //Gson
+    implementation ("com.google.code.gson:gson:2.10.1")
+
 
 
 }

@@ -15,7 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.frogtest.movieguru.domain.model.Movie
+import com.frogtest.movieguru.domain.model.movie.Movie
 import com.frogtest.movieguru.ui.theme.MovieGuruTheme
 
 @Composable
@@ -32,7 +32,7 @@ fun MovieItem(
                 .fillMaxWidth()
         ) {
             AsyncImage(
-                model = movie.poster,
+                model = "https://image.tmdb.org/t/p/original/${movie.posterPath}",
                 contentDescription = movie.title,
                 modifier = Modifier
                     .weight(1f)
@@ -51,7 +51,7 @@ fun MovieItem(
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = movie.year,
+                    text = movie.releaseDate,
                     style = MaterialTheme.typography.bodySmall
                 )
             }
@@ -64,14 +64,6 @@ fun MovieItem(
 @Composable
 fun MovieItemPreview() {
     MovieGuruTheme {
-        MovieItem(
-            movie = Movie(
-                imdbID = "tt0372784",
-                title = "Batman Begins",
-                year = "2005",
-                poster = "https://m.media-amazon.com/images/M/MV5BMjUyNzRhOWItMTViOS00NGQ0LTg0MjktOGQ0YWU2MmM3Mzc3XkEyXkFqcGdeQXVyNDQwMTQ5ODk@._V1_SX300.jpg",
-                type = "movie"
-            )
-        )
+
     }
 }

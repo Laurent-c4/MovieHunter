@@ -4,30 +4,23 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Upsert
-import com.frogtest.movieguru.data.cache.entity.MovieDetailsEntity
-import com.frogtest.movieguru.data.cache.entity.MovieEntity
+import com.frogtest.movieguru.data.cache.entity.movie_details.MovieDetailsEntity
 
 @Dao
 interface MovieDetailsDao {
 
     @Upsert
-    suspend fun insertAll(movies: List<MovieEntity>)
+    suspend fun insertAll(movies: List<MovieDetailsEntity>)
 
     @Insert
     suspend fun insertMovieDetails(movieDetailsEntity: MovieDetailsEntity): Long
 
-    // Select single movie by imdbid
-    @Query("SELECT * FROM MovieDetailsEntity WHERE imdbID = :imdbID")
-    suspend fun getMovieDetails(imdbID: String): MovieDetailsEntity?
+    @Query("SELECT * FROM movie_details WHERE id = :id")
+    suspend fun getMovieDetails(id: Int): MovieDetailsEntity?
 
-    // Delete single movie by imdbid
-    @Query("DELETE FROM MovieDetailsEntity WHERE imdbID = :imdbID")
-    suspend fun deleteMovieDetails(imdbID: String): Int
+    @Query("DELETE FROM movie_details WHERE id = :id")
+    suspend fun deleteMovieDetails(id: Int): Int
 
-    //Update tmdbID for a movie by imdbID
-    @Query("UPDATE MovieDetailsEntity SET tmdbID = :tmdbID WHERE imdbID = :imdbID")
-    suspend fun setTMDBID(imdbID: String, tmdbID: Int): Int
-
-    @Query("DELETE FROM MovieDetailsEntity")
+    @Query("DELETE FROM movie_details")
     suspend fun clearAll()
 }

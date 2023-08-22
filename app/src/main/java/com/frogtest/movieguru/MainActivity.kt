@@ -11,6 +11,7 @@ import androidx.activity.viewModels
 import androidx.biometric.BiometricPrompt
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -150,13 +151,15 @@ class MainActivity : FragmentActivity() {
                     Scaffold(
                         snackbarHost = { SnackbarHost(snackbarHostState) },
                     ) {
-                        Box(modifier = Modifier.padding(it))
+
                         NavSetUp(
                             navController = navController,
                             useGrid = useGrid,
                             useFingerPrint = useFingerprint,
                             showSettingsDialog = { showSettingsDialog.value = true },
+                            paddingValues = it,
                         )
+
                     }
 
                     AuthState(navController = navController)
@@ -189,14 +192,15 @@ class MainActivity : FragmentActivity() {
         navController: NavHostController,
         useGrid: Boolean,
         useFingerPrint: Boolean,
-        showSettingsDialog: () -> Unit = {}
+        showSettingsDialog: () -> Unit = {},
+        paddingValues: PaddingValues,
     ) {
         NavHost(
             navController = navController,
             startDestination = Screen.SignInScreen.route,
             modifier = Modifier
                 .fillMaxSize()
-//                .padding(paddingValues = paddingValues),
+                .padding(paddingValues = paddingValues),
         ) {
 
             composable(Screen.SignInScreen.route) {
@@ -298,7 +302,7 @@ class MainActivity : FragmentActivity() {
                 val imdbID = backStackEntry.arguments?.getString("imdbID")
                 val viewModel = hiltViewModel<MovieDetailsViewModel>()
                 MovieDetailsScreen(
-                    imdbID = imdbID ?: "",
+                    id = imdbID ?: "",
                     viewModel = viewModel,
                     showSettingsDialog = showSettingsDialog
                 )

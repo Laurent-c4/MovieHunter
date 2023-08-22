@@ -2,7 +2,7 @@ package com.frogtest.movieguru.data.network.dto
 
 import com.squareup.moshi.Json
 
-data class MovieDetailsDto (
+data class MovieDetailsIMDBDto (
 
     @field:Json(name ="Title"      ) var title      : String?            = null,
     @field:Json(name ="Year"       ) var year       : String?            = null,

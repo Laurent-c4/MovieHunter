@@ -43,7 +43,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun MovieDetailsScreen(
-    imdbID: String,
+    id: String,
     viewModel: MovieDetailsViewModel,
     showSettingsDialog: () -> Unit,
 ) {
@@ -66,15 +66,15 @@ fun MovieDetailsScreen(
                 onSettingsClicked = showSettingsDialog
             )
         },
-    ) {
-        Box(modifier = Modifier.padding(it) ) {
+    ) { innerPadding ->
+        Box(modifier = Modifier.padding(innerPadding)) {
             if (state.error == null) {
                 Column(Modifier.fillMaxSize()) {
 
                     SwipeRefresh(
                         modifier = Modifier.weight(1f),
                         state = swipeRefreshState,
-                        onRefresh = { viewModel.getMovieDetails(imdbID) },
+                        onRefresh = { viewModel.getMovie(id.toInt()) },
                         indicator = { refreshState, refreshTrigger ->
                             SwipeRefreshIndicator(
                                 state = refreshState,
@@ -89,9 +89,9 @@ fun MovieDetailsScreen(
                         ) {
                             state.movieDetails?.let { movieDetails ->
                                 item {
-                                    movieDetails.poster?.let { poster ->
+                                    movieDetails.posterPath?.let { path ->
                                         AsyncImage(
-                                            model = poster,
+                                            model = "https://image.tmdb.org/t/p/original/$path",
                                             contentDescription = "Poster",
                                             modifier = Modifier
                                                 .height(250.dp)
@@ -104,7 +104,7 @@ fun MovieDetailsScreen(
                                 }
 
                                 item {
-                                    movieDetails.title?.let {title ->
+                                    movieDetails.title?.let { title ->
                                         Text(
                                             text = title,
                                             style = MaterialTheme.typography.titleLarge,
@@ -117,7 +117,7 @@ fun MovieDetailsScreen(
                                 }
 
                                 item {
-                                    movieDetails.plot?.let {plot ->
+                                    movieDetails.overview?.let { plot ->
                                         Text(
                                             text = plot,
                                             Modifier.padding(start = 8.dp, end = 8.dp)
@@ -130,9 +130,9 @@ fun MovieDetailsScreen(
                                 }
 
                                 item {
-                                    movieDetails.imdbRating?.let {rating ->
+                                    movieDetails.popularity?.let { rating ->
                                         Text(
-                                            text = "IMDB Rating: $rating",
+                                            text = "Popularity: $rating",
                                             Modifier.padding(start = 8.dp, end = 8.dp)
                                         )
                                     }
@@ -143,7 +143,7 @@ fun MovieDetailsScreen(
                                 }
 
                                 item {
-                                    movieDetails.released?.let {released ->
+                                    movieDetails.releaseDate?.let { released ->
                                         Text(
                                             text = "Released: $released",
                                             Modifier.padding(start = 8.dp, end = 8.dp)
@@ -156,9 +156,11 @@ fun MovieDetailsScreen(
                                 }
 
                                 item {
-                                    movieDetails.actors?.let {actors ->
+                                    movieDetails.credits?.cast?.let { cast ->
+                                        val actors = cast.map { actor -> actor.name }
+
                                         Text(
-                                            text = "Cast: $actors",
+                                            text = "Cast: ${actors.take(5).joinToString()}",
                                             Modifier.padding(start = 8.dp, end = 8.dp)
                                         )
                                     }
@@ -172,10 +174,12 @@ fun MovieDetailsScreen(
                         }
                     }
 
-                    val ytVideos = state.movieVideos.filter {videos ->  videos.site == "YouTube" }
+                    val ytVideos =
+                        state.movieDetails?.videos?.results?.filter { videos -> videos.site == "YouTube" }
+
 
                     AnimatedVisibility(
-                        visible = ytVideos.isNotEmpty(),
+                        visible = ytVideos?.isNotEmpty() ?: false,
 
                         ) {
                         Column(
@@ -183,62 +187,64 @@ fun MovieDetailsScreen(
                             verticalArrangement = Arrangement.Bottom
                         ) {
 
-                            Box {
+                            ytVideos?.let { videos ->
+                                Box {
 
-                                HorizontalPager(
-                                    pageCount = ytVideos.size,
-                                    state = pagerState,
-                                    key = { ytVideos[it].key!! }
-                                ) { index ->
-                                    YoutubePlayer(youtubeVideoID = ytVideos[index].key!!)
+                                    HorizontalPager(
+                                        pageCount = ytVideos.size,
+                                        state = pagerState,
+                                        key = { ytVideos[it].key ?: "" },
+                                    ) { index ->
+                                        YoutubePlayer(youtubeVideoID = videos[index].key ?: "")
+                                    }
+
                                 }
 
-                            }
-
-                            if (ytVideos.size > 1) {
-                                Box(
-                                    modifier = Modifier
-                                        .offset(y = -(16).dp)
-                                        .fillMaxWidth(0.5f)
-                                        .clip(RoundedCornerShape(100))
-                                        .background(MaterialTheme.colorScheme.background)
+                                if (ytVideos.size > 1) {
+                                    Box(
+                                        modifier = Modifier
+                                            .offset(y = -(16).dp)
+                                            .fillMaxWidth(0.5f)
+                                            .clip(RoundedCornerShape(100))
+                                            .background(MaterialTheme.colorScheme.background)
 //                    .padding(8.dp)
-                                        .align(Alignment.CenterHorizontally)
-                                )
-                                {
-                                    IconButton(
-                                        onClick = {
-                                            scope.launch {
-                                                pagerState.animateScrollToPage(pagerState.currentPage - 1)
-                                            }
-                                        },
-                                        modifier = Modifier.align(Alignment.CenterStart)
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.KeyboardArrowLeft,
-                                            contentDescription = "Previous"
-                                        )
-                                    }
+                                            .align(Alignment.CenterHorizontally)
+                                    )
+                                    {
+                                        IconButton(
+                                            onClick = {
+                                                scope.launch {
+                                                    pagerState.animateScrollToPage(pagerState.currentPage - 1)
+                                                }
+                                            },
+                                            modifier = Modifier.align(Alignment.CenterStart)
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.KeyboardArrowLeft,
+                                                contentDescription = "Previous"
+                                            )
+                                        }
 
-                                    IconButton(
-                                        onClick = {
-                                            scope.launch {
-                                                pagerState.animateScrollToPage(pagerState.currentPage + 1)
-                                            }
-                                        },
-                                        modifier = Modifier.align(Alignment.CenterEnd)
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.KeyboardArrowRight,
-                                            contentDescription = "Next"
-                                        )
+                                        IconButton(
+                                            onClick = {
+                                                scope.launch {
+                                                    pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                                                }
+                                            },
+                                            modifier = Modifier.align(Alignment.CenterEnd)
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.KeyboardArrowRight,
+                                                contentDescription = "Next"
+                                            )
+                                        }
                                     }
                                 }
                             }
+
 
                         }
                     }
-
                 }
 
             }
@@ -271,7 +277,6 @@ fun MovieDetailsScreen(
             }
         }
     }
-
 
 
 }
