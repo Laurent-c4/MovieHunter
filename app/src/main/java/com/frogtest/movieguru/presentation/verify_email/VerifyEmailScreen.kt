@@ -1,7 +1,6 @@
 package com.frogtest.movieguru.presentation.verify_email
 
 import android.widget.Toast
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
@@ -11,14 +10,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.frogtest.movieguru.navigation.Screen
-import com.frogtest.movieguru.presentation.movie_info.MovieDetailsTopBar
 import com.frogtest.movieguru.presentation.sign_in.SignInViewModel
 import com.frogtest.movieguru.presentation.verify_email.components.VerifyEmailContent
-import com.frogtest.movieguru.util.Constants.EMAIL_NOT_VERIFIED_MESSAGE
 import com.frogtest.movieguru.util.Constants.VERIFY_EMAIL_MESSAGE
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -27,6 +22,7 @@ fun VerifyEmailScreen(
     navigateToHomeScreen: () -> Unit,
     showSettingsDialog: () -> Unit,
     viewModel: SignInViewModel = hiltViewModel(),
+    navigateBack: () -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -35,9 +31,10 @@ fun VerifyEmailScreen(
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            MovieDetailsTopBar(
+            VerifyEmailTopBar(
                 photoUrl = viewModel.getSignedInUser?.photoUrl,
-                onSettingsClicked = showSettingsDialog
+                onSettingsClicked = showSettingsDialog,
+                navigateBack = navigateBack
             )
         },
     ) {

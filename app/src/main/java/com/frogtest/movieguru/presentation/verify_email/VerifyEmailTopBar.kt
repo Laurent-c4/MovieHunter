@@ -1,12 +1,9 @@
-package com.frogtest.movieguru.presentation.movies
+package com.frogtest.movieguru.presentation.verify_email
 
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.FilterList
-import androidx.compose.material.icons.filled.GridView
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.ViewList
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -14,7 +11,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
@@ -22,45 +18,25 @@ import coil.compose.AsyncImage
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-fun MovieScreenTopBar(
+fun VerifyEmailTopBar(
+    title: String = "Movie Guru",
     photoUrl: String? = null,
-    isGridView: Boolean,
-    onViewToggled: (Boolean) -> Unit,
-    onSearchClicked: () -> Unit,
-    onFilterClicked: () -> Unit,
-    onSettingsClicked: () -> Unit
+    onSettingsClicked: () -> Unit,
+    navigateBack: () -> Unit
 ) {
     TopAppBar(
-        title = { Text(text = "Movie Guru") },
+        title = { Text(text = title) },
+        navigationIcon = {
+            IconButton(onClick = navigateBack ) {
+                Icon(
+                    imageVector = Icons.Default.ArrowBack,
+                    contentDescription = "Back",
+                    tint = MaterialTheme.colorScheme.onSurface
+                )
+            }
+        },
         actions =
         {
-
-            IconButton(
-                onClick = {onSearchClicked()}
-            )
-            {
-                Icon(
-                    imageVector = Icons.Default.Search,
-                    contentDescription = "Search",
-                    tint = MaterialTheme.colorScheme.onSurface
-                )
-            }
-
-//            IconButton(onClick = { onFilterClicked() })
-//            {
-//                Icon(
-//                    imageVector = Icons.Default.FilterList,
-//                    contentDescription = "Filter",
-//                    tint = MaterialTheme.colorScheme.onSurface
-//                )
-//            }
-            IconButton(onClick = {onViewToggled(!isGridView)} ) {
-                Icon(
-                    imageVector = if (isGridView) Icons.Default.ViewList else Icons.Default.GridView,
-                    contentDescription = "View",
-                    tint = MaterialTheme.colorScheme.onSurface
-                )
-            }
 
             IconButton(onClick = onSettingsClicked)
             {

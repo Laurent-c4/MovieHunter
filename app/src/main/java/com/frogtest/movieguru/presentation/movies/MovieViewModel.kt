@@ -114,6 +114,12 @@ class MovieViewModel @Inject constructor(
         }
     }
 
+    fun toggleView(isGrid: Boolean) {
+        viewModelScope.launch {
+            userSettingsRepository.useGrid(isGrid)
+        }
+    }
+
 }
 
 data class UserEditableSettings(

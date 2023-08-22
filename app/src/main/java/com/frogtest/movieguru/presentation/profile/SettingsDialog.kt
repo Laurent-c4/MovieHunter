@@ -129,7 +129,6 @@ fun SettingsDialogImpl(
                             onChangeDynamicColorPreference = onChangeDynamicColorPreference,
                             onChangeDarkThemeConfig = onChangeDarkThemePreference,
                             onToggleUseGrid = onToggleUseGrid,
-                            onToggleUseFingerprint = onToggleUseFingerprint,
                         )
                     }
                 }
@@ -205,42 +204,6 @@ private fun FingerprintSwitch(
     }
 }
 
-@Composable
-fun ToggleListView(useGrid: Boolean, onToggleUseGrid: () -> Unit) {
-    val radioOptions = listOf("Grid", "List")
-
-    Text(
-        text = stringResource(R.string.use_grid),
-        style = MaterialTheme.typography.labelLarge,
-        modifier = Modifier.padding(top = 16.dp)
-    )
-
-    Column {
-        radioOptions.forEach { text ->
-            Row(verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .selectable(
-                        selected = ((text == "Grid" && useGrid) || (text == "List" && !useGrid)),
-                        onClick = {
-                            onToggleUseGrid()
-                        }
-                    )
-//                    .padding(horizontal = 16.dp)
-            ) {
-                RadioButton(
-                    selected = ((text == "Grid" && useGrid) || (text == "List" && !useGrid)),
-                    onClick = { onToggleUseGrid() }
-                )
-                Text(
-                    text = text,
-                    style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.padding(start = 16.dp)
-                )
-            }
-        }
-    }
-}
 
 @Composable
 private fun SettingsPanel(
@@ -249,22 +212,21 @@ private fun SettingsPanel(
     onChangeDynamicColorPreference: (useDynamicColor: Boolean) -> Unit,
     onChangeDarkThemeConfig: (darkThemeConfig: String) -> Unit,
     onToggleUseGrid: (useGrid: Boolean) -> Unit,
-    onToggleUseFingerprint: (useFingerPrint: Boolean) -> Unit,
 ) {
 
-    SettingsDialogSectionTitle(text = stringResource(R.string.movie_listing))
-    Column(Modifier.selectableGroup()) {
-        SettingsDialogThemeChooserRow(
-            text = stringResource(R.string.grid),
-            selected = settings.useGrid,
-            onClick = { onToggleUseGrid(true) },
-        )
-        SettingsDialogThemeChooserRow(
-            text = stringResource(R.string.list),
-            selected = !settings.useGrid,
-            onClick = { onToggleUseGrid(false) },
-        )
-    }
+//    SettingsDialogSectionTitle(text = stringResource(R.string.movie_listing))
+//    Column(Modifier.selectableGroup()) {
+//        SettingsDialogThemeChooserRow(
+//            text = stringResource(R.string.grid),
+//            selected = settings.useGrid,
+//            onClick = { onToggleUseGrid(true) },
+//        )
+//        SettingsDialogThemeChooserRow(
+//            text = stringResource(R.string.list),
+//            selected = !settings.useGrid,
+//            onClick = { onToggleUseGrid(false) },
+//        )
+//    }
     if (supportDynamicColor) {
         SettingsDialogSectionTitle(text = stringResource(R.string.dynamic_color_preference))
         Column(Modifier.selectableGroup()) {

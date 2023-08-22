@@ -1,18 +1,16 @@
 package com.frogtest.movieguru.presentation.movies
 
 import android.util.Log
-import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -32,10 +30,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.paging.LoadState
+import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
-import com.frogtest.movieguru.presentation.profile.SettingsDialog
+import com.frogtest.movieguru.domain.model.movie.Movie
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
@@ -88,9 +87,11 @@ fun MovieScreen(
         {
             MovieScreenTopBar(
                 photoUrl = viewModel.getSignedInUser?.photoUrl,
+                isGridView = useGrid,
+                onViewToggled = viewModel::toggleView,
                 onSettingsClicked = showSettingsDialog,
                 onFilterClicked = { showFiltersDialog.value = true },
-                onSearchClicked = { showSearchBar.value = true }
+                onSearchClicked = { showSearchBar.value = true },
             )
 
             AnimatedVisibility(visible = showSearchBar.value) {
@@ -145,6 +146,8 @@ fun MovieScreen(
                 }
             } else {
 
+
+
                 SwipeRefresh(
                     state = swipeRefreshState,
                     onRefresh = { movies.refresh() },
@@ -158,81 +161,10 @@ fun MovieScreen(
                     },
                 ) {
 
-//                Column {
-//                    OutlinedTextField(
-//                        value = viewModel.searchQuery.value,
-//                        onValueChange = {
-//                            viewModel.onMovieEvent(
-//                                MovieEvent.OnSearchQueryChange(it)
-//                            )
-//                        },
-//                        modifier = Modifier
-//                            .padding(16.dp)
-//                            .fillMaxWidth(),
-//                        placeholder = {
-//                            Text(text = "Search...")
-//                        },
-//                        maxLines = 1,
-//                        singleLine = true
-//                    )
-//                }
                     if (useGrid)
-                        LazyVerticalGrid(
-                            columns = GridCells.Adaptive(minSize = 128.dp),
-                        ) {
-                            items(
-                                count = movies.itemCount,
-                                key = movies.itemKey { it.id },
-                                contentType = movies.itemContentType { it }
-                            ) { index ->
-
-                                val item = movies[index]
-
-                                item?.let {
-                                    MovieGridItem(
-                                        movie = it,
-                                        modifier = Modifier
-//                                            .height(270.dp)
-                                            .fillMaxHeight()
-                                            .padding(start = 1.dp, end = 1.dp, bottom = 5.dp)
-                                            .clickable {
-                                                navController.navigate("movie/${it.id}")
-                                            }
-                                    )
-                                }
-                            }
-                            item {
-                                if (movies.loadState.append is LoadState.Loading)
-                                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                            }
-                        }
+                        GridContent(movies, navController)
                     else
-                        LazyColumn(
-                            modifier = Modifier.fillMaxSize(),
-                            verticalArrangement = Arrangement.spacedBy(16.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            items(
-                                count = movies.itemCount,
-                                key = movies.itemKey { it.id }
-                            ) {
-                                val item = movies[it]
-
-                                if (item != null)
-                                    MovieItem(
-                                        movie = item,
-                                        modifier = Modifier
-                                            .fillMaxSize()
-                                            .clickable {
-                                                navController.navigate("movie/${item.id}")
-                                            }
-                                    )
-                            }
-                            item {
-                                if (movies.loadState.append is LoadState.Loading)
-                                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                            }
-                        }
+                        ListContent(movies, navController)
                 }
             }
         }
@@ -240,3 +172,76 @@ fun MovieScreen(
 
 
 }
+
+@Composable
+fun GridContent(movies: LazyPagingItems<Movie>, navController: NavController) {
+    LazyVerticalGrid(
+        columns = GridCells.Adaptive(minSize = 128.dp),
+    ) {
+        items(
+            count = movies.itemCount,
+            key = movies.itemKey { it.id },
+            contentType = movies.itemContentType { it }
+        ) { index ->
+
+            val item = movies[index]
+
+            item?.let {
+                MovieGridItem(
+                    movie = it,
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .padding(start = 1.dp, end = 1.dp, bottom = 5.dp)
+                        .clickable {
+                            navController.navigate("movie/${it.id}")
+                        }
+                )
+            }
+        }
+        item {
+            if (movies.loadState.append is LoadState.Loading)
+                Box(Modifier.fillMaxSize()) {
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .size(36.dp)
+                    )
+                }
+
+        }
+    }
+}
+@Composable
+fun ListContent(movies: LazyPagingItems<Movie>, navController: NavController) {
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        items(
+            count = movies.itemCount,
+            key = movies.itemKey { it.id }
+        ) {
+            val item = movies[it]
+
+            item?.let { itm ->
+                MovieListItem(
+                    movie = itm,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clickable {
+                            navController.navigate("movie/${itm.id}")
+                        }
+                )
+            }
+
+        }
+        item {
+            if (movies.loadState.append is LoadState.Loading)
+                Box(Modifier.fillMaxSize()) {
+                    CircularProgressIndicator(Modifier.align(Alignment.Center))
+                }
+        }
+    }
+}
+

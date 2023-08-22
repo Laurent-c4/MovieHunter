@@ -281,7 +281,8 @@ class MainActivity : FragmentActivity() {
                         navController.navigate(Screen.MovieScreen.route) {
                             popUpTo(navController.graph.id) { inclusive = true }
                         }
-                    }, showSettingsDialog = showSettingsDialog
+                    }, showSettingsDialog = showSettingsDialog,
+                    navigateBack = { navController.popBackStack() }
                 )
             }
             composable(Screen.SignUpScreen.route) {
@@ -304,7 +305,8 @@ class MainActivity : FragmentActivity() {
                 MovieDetailsScreen(
                     id = imdbID ?: "",
                     viewModel = viewModel,
-                    showSettingsDialog = showSettingsDialog
+                    showSettingsDialog = showSettingsDialog,
+                    navigateBack = { navController.popBackStack() }
                 )
             }
         }

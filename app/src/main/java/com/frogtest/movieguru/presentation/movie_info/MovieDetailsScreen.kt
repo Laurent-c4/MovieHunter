@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -34,7 +33,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
@@ -46,6 +44,7 @@ fun MovieDetailsScreen(
     id: String,
     viewModel: MovieDetailsViewModel,
     showSettingsDialog: () -> Unit,
+    navigateBack: () -> Unit,
 ) {
 
     val TAG = "MovieDetailsScreen"
@@ -62,8 +61,10 @@ fun MovieDetailsScreen(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             MovieDetailsTopBar(
-                photoUrl = viewModel.getSignedInUser?.photoUrl,
-                onSettingsClicked = showSettingsDialog
+                title = state.movie?.title ?: "",
+                showVideos = false,
+                onShowVideosClicked = {},
+                navigateBack = navigateBack
             )
         },
     ) { innerPadding ->
@@ -87,16 +88,9 @@ fun MovieDetailsScreen(
                         LazyColumn(
                             horizontalAlignment = Alignment.CenterHorizontally,
                         ) {
-                            state.movieDetails?.let { movieDetails ->
+                            state.movie?.let { movie ->
                                 item {
-                                    movieDetails.posterPath?.let { path ->
-                                        AsyncImage(
-                                            model = "https://image.tmdb.org/t/p/original/$path",
-                                            contentDescription = "Poster",
-                                            modifier = Modifier
-                                                .height(250.dp)
-                                        )
-                                    }
+                                    MovieDetailsPoster(movie = movie)
                                 }
 
                                 item {
@@ -104,12 +98,10 @@ fun MovieDetailsScreen(
                                 }
 
                                 item {
-                                    movieDetails.title?.let { title ->
-                                        Text(
-                                            text = title,
-                                            style = MaterialTheme.typography.titleLarge,
-                                        )
-                                    }
+                                    Text(
+                                        text = movie.overview,
+                                        Modifier.padding(start = 8.dp, end = 8.dp)
+                                    )
                                 }
 
                                 item {
@@ -117,12 +109,11 @@ fun MovieDetailsScreen(
                                 }
 
                                 item {
-                                    movieDetails.overview?.let { plot ->
-                                        Text(
-                                            text = plot,
-                                            Modifier.padding(start = 8.dp, end = 8.dp)
-                                        )
-                                    }
+                                    Text(
+                                        text = "Popularity: ${movie.popularity}",
+                                        Modifier.padding(start = 8.dp, end = 8.dp)
+                                    )
+
                                 }
 
                                 item {
@@ -130,48 +121,33 @@ fun MovieDetailsScreen(
                                 }
 
                                 item {
-                                    movieDetails.popularity?.let { rating ->
-                                        Text(
-                                            text = "Popularity: $rating",
-                                            Modifier.padding(start = 8.dp, end = 8.dp)
-                                        )
-                                    }
-                                }
-
-                                item {
-                                    Spacer(modifier = Modifier.padding(8.dp))
-                                }
-
-                                item {
-                                    movieDetails.releaseDate?.let { released ->
-                                        Text(
-                                            text = "Released: $released",
-                                            Modifier.padding(start = 8.dp, end = 8.dp)
-                                        )
-                                    }
-                                }
-
-                                item {
-                                    Spacer(modifier = Modifier.padding(8.dp))
-                                }
-
-                                item {
-                                    movieDetails.credits?.cast?.let { cast ->
-                                        val actors = cast.map { actor -> actor.name }
-
-                                        Text(
-                                            text = "Cast: ${actors.take(5).joinToString()}",
-                                            Modifier.padding(start = 8.dp, end = 8.dp)
-                                        )
-                                    }
-                                }
-
-                                item {
-                                    Divider(Modifier.padding(top = 16.dp, bottom = 8.dp))
+                                    Text(
+                                        text = "Released: ${movie.releaseDate}",
+                                        Modifier.padding(start = 8.dp, end = 8.dp)
+                                    )
                                 }
                             }
 
+                            item {
+                                Spacer(modifier = Modifier.padding(8.dp))
+                            }
+
+                            item {
+                                state.movieDetails?.credits?.cast?.let { cast ->
+                                    val actors = cast.map { actor -> actor.name }
+
+                                    Text(
+                                        text = "Cast: ${actors.take(5).joinToString()}",
+                                        Modifier.padding(start = 8.dp, end = 8.dp)
+                                    )
+                                }
+                            }
+
+                            item {
+                                Divider(Modifier.padding(top = 16.dp, bottom = 8.dp))
+                            }
                         }
+
                     }
 
                     val ytVideos =
