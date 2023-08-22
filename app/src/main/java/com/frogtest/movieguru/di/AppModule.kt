@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.room.Room
 import com.frogtest.movieguru.MovieApp
 import com.frogtest.movieguru.data.cache.MovieDatabase
-import com.frogtest.movieguru.data.network.api.OMDBMovieAPI
 import com.frogtest.movieguru.data.network.api.TMDBMovieAPI
 import com.frogtest.movieguru.data.repository.AuthRepositoryImpl
 import com.frogtest.movieguru.domain.repository.AuthRepository
@@ -39,16 +38,6 @@ object AppModule {
             MovieDatabase::class.java,
             "movie.db"
         ).build()
-    }
-
-    @Provides
-    @Singleton
-    fun provideMovieApi(): OMDBMovieAPI {
-        return Retrofit.Builder()
-            .baseUrl(OMDBMovieAPI.BASE_URL)
-            .addConverterFactory(MoshiConverterFactory.create())
-            .build()
-            .create(OMDBMovieAPI::class.java)
     }
 
     @Provides

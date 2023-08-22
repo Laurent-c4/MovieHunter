@@ -2,8 +2,7 @@ package com.frogtest.movieguru.data.network.api
 
 import com.frogtest.movieguru.BuildConfig
 import com.frogtest.movieguru.data.network.apiresponses.MoviesResponse
-import com.frogtest.movieguru.data.network.apiresponses.MovieVideosResponse
-import com.frogtest.movieguru.data.network.dto.MovieDetailsTMDBDto
+import com.frogtest.movieguru.data.network.dto.movie_details.MovieDetails2Dto
 import com.frogtest.movieguru.data.network.dto.movie_details.MovieDetailsDto
 import retrofit2.http.GET
 import retrofit2.http.Path
@@ -34,15 +33,8 @@ interface TMDBMovieAPI {
         @Query("api_key") apiKey: String = API_KEY,
         @Query("external_source") externalSource: String = "imdb_id",
 
-    ): MovieDetailsTMDBDto
+    ): MovieDetails2Dto
 
-    @GET("movie/{tmdb_id}/{route}")
-    suspend fun getMovieVideos(
-        @Path("tmdb_id") tmdbID: Int,
-        @Path("route") route: String = "videos",
-        @Query("api_key") apiKey: String = API_KEY,
-
-    ): MovieVideosResponse
 
     companion object {
         const val BASE_URL = "https://api.themoviedb.org/3/"

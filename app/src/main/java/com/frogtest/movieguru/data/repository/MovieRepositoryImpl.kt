@@ -11,7 +11,6 @@ import com.frogtest.movieguru.data.mappers.toMovie
 import com.frogtest.movieguru.data.mappers.toMovieDetails
 import com.frogtest.movieguru.data.mappers.toMovieDetailsEntity
 import com.frogtest.movieguru.data.network.MovieNetworkMediator
-import com.frogtest.movieguru.data.network.api.OMDBMovieAPI
 import com.frogtest.movieguru.data.network.api.TMDBMovieAPI
 import com.frogtest.movieguru.domain.model.movie.Movie
 import com.frogtest.movieguru.domain.model.movie_details.MovieDetails
@@ -26,7 +25,6 @@ import javax.inject.Singleton
 
 @Singleton
 class MovieRepositoryImpl @Inject constructor(
-    val omDBApi: OMDBMovieAPI,
     val tmDBApi: TMDBMovieAPI,
     val movieDatabase: MovieDatabase
 ) : MovieRepository {
