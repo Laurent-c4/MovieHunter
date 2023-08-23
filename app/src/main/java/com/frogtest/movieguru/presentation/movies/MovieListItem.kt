@@ -46,6 +46,7 @@ fun MovieListItem(movie: Movie, modifier: Modifier = Modifier) {
                 .defaultMinSize(minHeight = 220.dp)
             ,
             placeholder = painterResource(id = R.drawable.baseline_image_24),
+            error = painterResource(id = R.drawable.baseline_image_24),
         )
         Surface(
             modifier = Modifier
@@ -73,13 +74,13 @@ fun MovieListItem(movie: Movie, modifier: Modifier = Modifier) {
                 color = Color.White,
                 style = MaterialTheme.typography.titleSmall,
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.fillMaxWidth(.8f)
             )
             MovieListItemInfo(
                 modifier = Modifier.weight(3f),
 //                painter = painterResource(id = R.drawable.baseline_movie_filter_24),
-                info = movie.releaseDate.substring(0, 4),
-
+                info = if (movie.releaseDate.length> 4) movie.releaseDate.substring(0, 4) else movie.releaseDate,
             )
         }
     }

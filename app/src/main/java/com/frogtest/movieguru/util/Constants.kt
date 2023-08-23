@@ -18,9 +18,8 @@ object Constants {
     const val FORGOT_PASSWORD_SCREEN = "Forgot password"
     const val SIGN_UP_SCREEN = "Sign up"
     const val VERIFY_EMAIL_SCREEN = "Verify email"
-    const val PROFILE_SCREEN = "Profile"
+    const val SEARCH_SCREEN = "Search"
     const val MOVIE_SCREEN = "Movie"
-    const val MOVIE_DETAILS_SCREEN = "Movie Details"
 
     //Labels
     const val EMAIL_LABEL = "Email"

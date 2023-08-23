@@ -1,26 +1,41 @@
-package com.frogtest.movieguru.presentation.movies
+package com.frogtest.movieguru.presentation.search
 
 import android.util.Log
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.windowInsetsTopHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.GridView
+import androidx.compose.material.icons.filled.ViewList
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -32,7 +47,8 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
 import com.frogtest.movieguru.domain.model.movie.Movie
-import com.frogtest.movieguru.navigation.Screen
+import com.frogtest.movieguru.presentation.movies.MovieGridItem
+import com.frogtest.movieguru.presentation.movies.MovieListItem
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
@@ -42,11 +58,10 @@ private const val TAG = "MovieScreen"
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun MovieScreen(
+fun SearchScreen(
     navController: NavController,
-    viewModel: MovieViewModel,
+    viewModel: SearchViewModel,
     useGrid: Boolean = true,
-    showSettingsDialog: () -> Unit,
 ) {
     val context = LocalContext.current
 
@@ -54,14 +69,16 @@ fun MovieScreen(
     val swipeRefreshState =
         rememberSwipeRefreshState(isRefreshing = movies.loadState.refresh is LoadState.Loading)
 
+    val showFiltersDialog = remember { mutableStateOf(false) }
+    if (showFiltersDialog.value) {
+        SearchFilterDialog(
+            onDismiss = { showFiltersDialog.value = false },
+        )
+    }
+
     LaunchedEffect(key1 = movies.loadState) {
         if (movies.loadState.refresh is LoadState.Error) {
             if (movies.itemCount > 0)
-//                Toast.makeText(
-//                    context,
-//                    "Error: " + (movies.loadState.refresh as LoadState.Error).error.message,
-//                    Toast.LENGTH_LONG
-//                ).show()
                 Log.e(
                     TAG,
                     "MovieScreen: Load Error" + (movies.loadState.refresh as LoadState.Error).error.message
@@ -73,13 +90,19 @@ fun MovieScreen(
         modifier = Modifier.fillMaxSize(),
         topBar =
         {
-            MovieScreenTopBar(
-                photoUrl = viewModel.getSignedInUser?.photoUrl,
-                isGridView = useGrid,
-                onViewToggled = viewModel::toggleView,
-                onSettingsClicked = showSettingsDialog,
-                onSearchClicked = { navController.navigate(Screen.SearchScreen.route) }
-            )
+            AnimatedVisibility(visible = true) {
+                Spacer(Modifier.windowInsetsTopHeight(WindowInsets.safeDrawing))
+                SearchWidget(
+                    text = viewModel.searchQuery.value,
+                    onSearchEvent = viewModel::onSearchEvent,
+                    navigateBack = { navController.popBackStack() },
+                    useGridView = useGrid,
+                    onFilterClicked = { showFiltersDialog.value = true },
+                    modifier = Modifier
+                        .padding(8.dp)
+                )
+            }
+
         },
     ) { paddingValues ->
         Box(
@@ -88,7 +111,7 @@ fun MovieScreen(
                 .padding(paddingValues)
         ) {
             if (movies.loadState.refresh is LoadState.Loading) {
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+//                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
             } else if (movies.itemCount == 0) {
                 if (movies.loadState.refresh is LoadState.Error) {
                     Column(
@@ -121,7 +144,6 @@ fun MovieScreen(
                     }
                 }
             } else {
-
 
 
                 SwipeRefresh(
@@ -187,6 +209,7 @@ fun GridContent(movies: LazyPagingItems<Movie>, navController: NavController) {
         }
     }
 }
+
 @Composable
 fun ListContent(movies: LazyPagingItems<Movie>, navController: NavController) {
     LazyColumn(

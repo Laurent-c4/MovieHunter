@@ -48,5 +48,9 @@ class UserSettingsRepositoryImpl @Inject constructor(
         preferencesDataSource.toggleSort(sort)
     }
 
+    override suspend fun toggleShowVideos(showVideos: Boolean) {
+        preferencesDataSource.toggleShowVideos(showVideos)
+    }
+
 
 }

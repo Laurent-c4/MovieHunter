@@ -27,7 +27,6 @@ fun MovieScreenTopBar(
     isGridView: Boolean,
     onViewToggled: (Boolean) -> Unit,
     onSearchClicked: () -> Unit,
-    onFilterClicked: () -> Unit,
     onSettingsClicked: () -> Unit
 ) {
     TopAppBar(

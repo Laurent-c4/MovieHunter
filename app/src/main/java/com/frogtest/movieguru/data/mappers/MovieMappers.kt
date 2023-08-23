@@ -2,6 +2,7 @@ package com.frogtest.movieguru.data.mappers
 
 import com.frogtest.movieguru.data.cache.entity.movie_details.MovieDetailsEntity
 import com.frogtest.movieguru.data.cache.entity.movie.MovieEntity
+import com.frogtest.movieguru.data.cache.entity.search.MovieSearchEntity
 import com.frogtest.movieguru.domain.model.movie.Movie
 import com.frogtest.movieguru.data.network.dto.movie.MovieDto
 import com.frogtest.movieguru.data.network.dto.movie_details.MovieDetailsDto
@@ -40,7 +41,71 @@ fun MovieDto.toMovieEntity(): MovieEntity {
     )
 }
 
+fun MovieDto.toMovieSearchEntity(): MovieSearchEntity {
+    return MovieSearchEntity(
+        pk = id.toString(),
+        id = id,
+        adult = adult,
+        backdropPath = backdropPath,
+        title = title,
+        originalLanguage = originalLanguage,
+        originalTitle = originalTitle,
+        overview = overview,
+        posterPath = posterPath,
+        mediaType = mediaType,
+        genreIds = genreIds,
+        popularity = popularity,
+        releaseDate = releaseDate,
+        video = video,
+        voteAverage = voteAverage,
+        voteCount = voteCount,
+        name = name,
+        originalName = originalName,
+        firstAirDate = firstAirDate
+    )
+}
+
+fun MovieDto.toMovie(): Movie{
+    return  Movie(
+        id = id,
+        adult = adult?:false,
+        backdropPath = backdropPath?:"",
+        title = title?:name?:"",
+        originalLanguage = originalLanguage?:"",
+        originalTitle = originalTitle?:originalName?:"",
+        overview = overview?:"",
+        posterPath = posterPath?:"",
+        mediaType = mediaType?:"",
+        genreIds = genreIds,
+        popularity = popularity?:0.0,
+        releaseDate = releaseDate?:firstAirDate?:"",
+        video = video?:false,
+        voteAverage = voteAverage?:0.0,
+        voteCount = voteCount?:0,
+    )
+}
+
 fun MovieEntity.toMovie(): Movie {
+    return Movie(
+        id = id,
+        adult = adult ?: false,
+        backdropPath = backdropPath ?: "",
+        title = title ?: name ?: "",
+        originalLanguage = originalLanguage ?: "",
+        originalTitle = originalTitle ?: originalName ?: "",
+        overview = overview ?: "",
+        posterPath = posterPath ?: "",
+        mediaType = mediaType ?: "",
+        genreIds = genreIds,
+        popularity = popularity ?: 0.0,
+        releaseDate = releaseDate ?: firstAirDate ?: "",
+        video = video ?: false,
+        voteAverage = voteAverage ?: 0.0,
+        voteCount = voteCount ?: 0,
+    )
+}
+
+fun MovieSearchEntity.toMovie(): Movie {
     return Movie(
         id = id,
         adult = adult ?: false,

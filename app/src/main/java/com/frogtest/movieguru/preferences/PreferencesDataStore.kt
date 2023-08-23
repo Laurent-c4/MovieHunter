@@ -33,11 +33,13 @@ constructor(app: MovieApp) {
     //create a flow to listen to changes in the datastore
      val userSettings = datastore.data.map { preferences ->
         UserSettings(
-            useGrid = preferences[USE_GRID] ?: true,
+            useGrid = preferences[USE_GRID] ?: false,
             useDynamicColor = preferences[USE_DYNAMIC_COLOR] ?: true,
             useFingerPrint = preferences[USE_FINGERPRINT] ?: true,
             darkThemeConfig  = preferences[DATA_THEME_CONFIG] ?: DarkThemeConfig.FOLLOW_SYSTEM,
-            sort = preferences[SORT] ?: false
+            sort = preferences[SORT] ?: false,
+            showVideos = preferences[SHOW_VIDEOS] ?: true,
+
 
         )
     }
@@ -46,6 +48,14 @@ constructor(app: MovieApp) {
         scope.launch {
             datastore.edit { preferences ->
                 preferences[USE_GRID] = useGrid
+            }
+        }
+    }
+
+    fun toggleShowVideos(showVideos:Boolean) {
+        scope.launch {
+            datastore.edit { preferences ->
+                preferences[SHOW_VIDEOS] = showVideos
             }
         }
     }
@@ -88,6 +98,7 @@ constructor(app: MovieApp) {
         private val DATA_THEME_CONFIG = stringPreferencesKey("data_theme_config_key")
         private val USE_FINGERPRINT = booleanPreferencesKey("use_fingerprint_key")
         private val SORT = booleanPreferencesKey("sort_key")
+        private val SHOW_VIDEOS = booleanPreferencesKey("show_videos_key")
 
     }
 }

@@ -1,15 +1,21 @@
-package com.frogtest.movieguru.presentation.movies
+package com.frogtest.movieguru.presentation.search
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.ViewList
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -17,7 +23,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -27,11 +32,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.frogtest.movieguru.R
 import kotlinx.coroutines.job
 
 
@@ -39,17 +46,17 @@ import kotlinx.coroutines.job
 @Composable
 fun SearchWidget(
     text: String,
-    onTextChange: (MovieEvent) -> Unit,
-    onSearchClicked: (MovieEvent) -> Unit,
+    onSearchEvent: (SearchEvent) -> Unit,
+    navigateBack: () -> Unit,
     onFilterClicked: () -> Unit,
-    onDismiss: () -> Unit
+    useGridView: Boolean,
+    modifier: Modifier = Modifier,
 ) {
     val focusRequester = remember { FocusRequester()}
 
     Surface(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
-            .height(56.dp)
             .semantics {
                 contentDescription = "SearchWidget"
             },
@@ -59,17 +66,40 @@ fun SearchWidget(
     ) {
 
         Row(
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.fillMaxWidth(),
         ) {
+            IconButton(onClick = navigateBack) {
+                Icon(
+                    imageVector = Icons.Default.ArrowBack,
+                    contentDescription = stringResource(
+                        id = R.string.back,
+                    ),
+                )
+            }
+            IconButton(
+                onClick = onFilterClicked,
+
+                )
+            {
+                Icon(
+                    imageVector = Icons.Default.FilterList,
+                    contentDescription = "Filter",
+                    tint = MaterialTheme.colorScheme.onSurface
+                )
+            }
             OutlinedTextField(
                 modifier = Modifier
-                    .fillMaxWidth(0.9f )
                     .semantics {
                         contentDescription = "TextField"
                     }
-                    .focusRequester(focusRequester),
+                    .focusRequester(focusRequester)
+                    .fillMaxWidth()
+                    .background(color = MaterialTheme.colorScheme.background),
+                shape = RoundedCornerShape(32.dp),
                 value = text,
-                onValueChange = { onTextChange(MovieEvent.OnSearchQueryChange(it)) },
+                onValueChange = { onSearchEvent(SearchEvent.OnSearchQueryChange(it)) },
                 placeholder = {
                     Text(
                         modifier = Modifier
@@ -78,9 +108,6 @@ fun SearchWidget(
                         text = "Search here...",
                     )
                 },
-//            textStyle = TextStyle(
-//                color = MaterialTheme.colors.topAppBarContentColor
-//            ),
                 singleLine = true,
                 leadingIcon = {
                     IconButton(
@@ -100,9 +127,10 @@ fun SearchWidget(
                             },
                         onClick = {
                             if (text.isNotEmpty()) {
-                                onTextChange(MovieEvent.OnSearchQueryChange(""))
+                                onSearchEvent(SearchEvent.OnSearchQueryChange(""))
                             } else {
-                                onDismiss()
+                                onSearchEvent(SearchEvent.ClearSearch)
+                                navigateBack()
                             }
                         }
                     ) {
@@ -116,7 +144,7 @@ fun SearchWidget(
                 ),
                 keyboardActions = KeyboardActions(
                     onSearch = {
-                        onSearchClicked(MovieEvent.OnSearchInitiated)
+                        onSearchEvent(SearchEvent.OnSearchInitiated)
                     }
                 ),
                 colors = TextFieldDefaults.textFieldColors(
@@ -126,15 +154,6 @@ fun SearchWidget(
 //                cursorColor = MaterialTheme.colors.topAppBarContentColor
                 )
             )
-
-            IconButton(onClick = { onFilterClicked() })
-            {
-                Icon(
-                    imageVector = Icons.Default.FilterList,
-                    contentDescription = "Filter",
-                    tint = MaterialTheme.colorScheme.onSurface
-                )
-            }
 
         }
 
@@ -152,9 +171,9 @@ fun SearchWidget(
 fun SearchWidgetPreview() {
     SearchWidget(
         text = "Search",
-        onTextChange = {},
-        onSearchClicked = {},
-        onDismiss = {},
-        onFilterClicked = {}
+        onSearchEvent = {},
+        navigateBack = {},
+        onFilterClicked = {},
+        useGridView = false
     )
 }

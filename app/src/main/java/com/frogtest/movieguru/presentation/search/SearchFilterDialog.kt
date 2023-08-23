@@ -14,69 +14,53 @@
  * limitations under the License.
  */
 
-package com.frogtest.movieguru.presentation.movies
+package com.frogtest.movieguru.presentation.search
 
-import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Divider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
-import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil.compose.AsyncImage
 import com.frogtest.movieguru.R
-import com.frogtest.movieguru.presentation.sign_in.UserProfile
-import com.frogtest.movieguru.util.DarkThemeConfig
 
 @Composable
-fun MovieFilterDialog(
+fun SearchFilterDialog(
     onDismiss: () -> Unit,
-    viewModel: MovieViewModel = hiltViewModel(),
+    viewModel: SearchViewModel = hiltViewModel(),
 ) {
     val settingsUiState by viewModel.settingsUiState.collectAsStateWithLifecycle()
     FilterDialogImpl(
         onDismiss = onDismiss,
         settingsUiState = settingsUiState,
-        onToggleSort = viewModel::onMovieEvent,
+        onSearchEvent = viewModel::onSearchEvent,
     )
 }
 
 @Composable
 fun FilterDialogImpl(
-    onToggleSort: (event:MovieEvent) -> Unit,
+    onSearchEvent: (event: SearchEvent) -> Unit,
     onDismiss: () -> Unit,
     settingsUiState: SettingsUiState,
 ) {
@@ -105,7 +89,7 @@ fun FilterDialogImpl(
                     is SettingsUiState.Success -> {
                         FilterPanel(
                             settings = settingsUiState.settings,
-                            onToggleSort = onToggleSort,
+                            onSearchEvent = onSearchEvent,
                         )
                     }
                 }
@@ -129,19 +113,19 @@ fun FilterDialogImpl(
 @Composable
 private fun FilterPanel(
     settings: UserEditableSettings,
-    onToggleSort: (event:MovieEvent) -> Unit,
+    onSearchEvent: (event: SearchEvent) -> Unit,
 ) {
     SettingsDialogSectionTitle(text = stringResource(R.string.sort_ascending))
     Column(Modifier.selectableGroup()) {
         SettingsDialogThemeChooserRow(
             text = stringResource(R.string.dynamic_color_yes),
             selected = settings.sort,
-            onClick = { onToggleSort(MovieEvent.OnSortToggled(true)) },
+            onClick = { onSearchEvent(SearchEvent.OnSortToggled(true)) },
         )
         SettingsDialogThemeChooserRow(
             text = stringResource(R.string.dynamic_color_no),
             selected = !settings.sort,
-            onClick = { onToggleSort(MovieEvent.OnSortToggled(false)) },
+            onClick = { onSearchEvent(SearchEvent.OnSortToggled(false)) },
         )
     }
 }

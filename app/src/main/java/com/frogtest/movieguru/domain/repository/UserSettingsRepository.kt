@@ -34,4 +34,6 @@ interface UserSettingsRepository {
      * Sets whether movies should be sort
      */
     suspend fun toggleSort(sort: Boolean)
+
+    suspend fun toggleShowVideos(showVideos: Boolean)
 }

@@ -24,5 +24,6 @@ data class UserSettings(
     val useDynamicColor: Boolean,
     val useGrid: Boolean,
     val useFingerPrint: Boolean,
-    val sort: Boolean
+    val sort: Boolean,
+    val showVideos: Boolean,
 )

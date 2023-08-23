@@ -51,6 +51,8 @@ import com.frogtest.movieguru.presentation.movie_info.MovieDetailsViewModel
 import com.frogtest.movieguru.presentation.movies.MovieScreen
 import com.frogtest.movieguru.presentation.movies.MovieViewModel
 import com.frogtest.movieguru.presentation.profile.SettingsDialog
+import com.frogtest.movieguru.presentation.search.SearchScreen
+import com.frogtest.movieguru.presentation.search.SearchViewModel
 import com.frogtest.movieguru.presentation.sign_in.SignInScreen
 import com.frogtest.movieguru.presentation.sign_in.SignInViewModel
 import com.frogtest.movieguru.presentation.sign_up.SignUpScreen
@@ -112,6 +114,7 @@ class MainActivity : FragmentActivity() {
             val darkTheme = shouldUseDarkTheme(uiState)
             val systemUiController = rememberSystemUiController()
             val useFingerprint = shouldUseFingerPrint(uiState = uiState)
+            val showVideos = shouldShowVideos(uiState = uiState)
             val useGrid = shouldUseGrid(uiState = uiState)
             val useDynamicColor = useDynamicColor(uiState = uiState)
             val showSettingsDialog = remember { mutableStateOf(false) }
@@ -157,6 +160,7 @@ class MainActivity : FragmentActivity() {
                             useGrid = useGrid,
                             useFingerPrint = useFingerprint,
                             showSettingsDialog = { showSettingsDialog.value = true },
+                            showVideos = showVideos,
                             paddingValues = it,
                         )
 
@@ -192,6 +196,7 @@ class MainActivity : FragmentActivity() {
         navController: NavHostController,
         useGrid: Boolean,
         useFingerPrint: Boolean,
+        showVideos: Boolean,
         showSettingsDialog: () -> Unit = {},
         paddingValues: PaddingValues,
     ) {
@@ -299,14 +304,23 @@ class MainActivity : FragmentActivity() {
                     showSettingsDialog = showSettingsDialog
                 )
             }
-            composable("movie/{imdbID}") { backStackEntry ->
-                val imdbID = backStackEntry.arguments?.getString("imdbID")
+            composable("movie/{id}") { backStackEntry ->
+                val id = backStackEntry.arguments?.getString("id")
+                Log.d(TAG, "NavSetUp: Movie ID -  $id")
                 val viewModel = hiltViewModel<MovieDetailsViewModel>()
                 MovieDetailsScreen(
-                    id = imdbID ?: "",
+                    id = id ?: "",
                     viewModel = viewModel,
-                    showSettingsDialog = showSettingsDialog,
-                    navigateBack = { navController.popBackStack() }
+                    navigateBack = { navController.popBackStack() },
+                    showVideos = showVideos,
+                )
+            }
+            composable(Screen.SearchScreen.route) {
+                val viewModel = hiltViewModel<SearchViewModel>()
+                SearchScreen(
+                    viewModel = viewModel,
+                    navController = navController,
+                    useGrid = useGrid,
                 )
             }
         }
@@ -420,6 +434,14 @@ class MainActivity : FragmentActivity() {
     ): Boolean = when (uiState) {
         MainActivityUiState.Loading -> false
         is MainActivityUiState.Success -> uiState.userSettings.useFingerPrint
+    }
+
+    @Composable
+    private fun shouldShowVideos(
+        uiState: MainActivityUiState,
+    ): Boolean = when (uiState) {
+        MainActivityUiState.Loading -> false
+        is MainActivityUiState.Success -> uiState.userSettings.showVideos
     }
 
     @Composable

@@ -43,7 +43,7 @@ import kotlinx.coroutines.launch
 fun MovieDetailsScreen(
     id: String,
     viewModel: MovieDetailsViewModel,
-    showSettingsDialog: () -> Unit,
+    showVideos: Boolean,
     navigateBack: () -> Unit,
 ) {
 
@@ -62,8 +62,8 @@ fun MovieDetailsScreen(
         topBar = {
             MovieDetailsTopBar(
                 title = state.movie?.title ?: "",
-                showVideos = false,
-                onShowVideosClicked = {},
+                showVideos = showVideos,
+                onShowVideosClicked = {viewModel.toggleShowVideos(!showVideos)},
                 navigateBack = navigateBack
             )
         },
@@ -155,7 +155,7 @@ fun MovieDetailsScreen(
 
 
                     AnimatedVisibility(
-                        visible = ytVideos?.isNotEmpty() ?: false,
+                        visible = (ytVideos?.isNotEmpty() == true && showVideos),
 
                         ) {
                         Column(

@@ -9,19 +9,31 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface TMDBMovieAPI {
-    @GET("trending/{type}/{length}")
+    @GET("trending/{type}/{time_window}")
     suspend fun getTrendingMovies(
         @Path("type") type: String = "movie",
-        @Path("length") length: String = "day",
+        @Path("time_window") length: String = "day",
         @Query("page") page: Int = 1,
         @Query("language") language: String = "en-US",
         @Query("api_key") apiKey: String = API_KEY,
     ): MoviesResponse
 
+    @GET("search/{type}")
+    suspend fun searchMovies(
+        @Path("type") type: String = "movie",
+        @Query("query") query: String,
+        @Query("page") page: Int = 1,
+        @Query("language") language: String = "en-US",
+        @Query("include_adult") includeAdult: Boolean = false,
+        @Query("api_key") apiKey: String = API_KEY,
+    ): MoviesResponse
+
+
+
     @GET("{type}/{id}")
     suspend fun getMovieDetails(
         @Path("id") id: Int,
-        @Path("type") type: String,
+        @Path("type") type: String = "movie",
         @Query("language") language: String = "en-US",
         @Query("append_to_response") appendToResponse: String = "videos,credits",
         @Query("api_key") apiKey: String = API_KEY,

@@ -9,8 +9,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.frogtest.movieguru.domain.repository.AuthRepository
 import com.frogtest.movieguru.domain.repository.MovieRepository
+import com.frogtest.movieguru.domain.repository.UserSettingsRepository
 import com.frogtest.movieguru.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -18,15 +23,44 @@ import javax.inject.Inject
 class MovieDetailsViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val repository: MovieRepository,
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val userDataRepository: UserSettingsRepository,
 ) : ViewModel() {
 
     private val TAG = "MovieDetailsViewModel"
 
     var state by mutableStateOf(MovieDetailsState())
 
+    val settingsUiState: StateFlow<SettingsUiState> =
+        userDataRepository.userSettings
+            .map { userData ->
+                SettingsUiState.Success(
+                    settings = UserEditableSettings(
+                        showVideos = userData.showVideos,
+                    ),
+                )
+            }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.Eagerly,
+                initialValue = SettingsUiState.Loading,
+            )
+
+    fun toggleShowVideos(show: Boolean) {
+        viewModelScope.launch {
+            userDataRepository.toggleShowVideos(show)
+        }
+    }
+
+    fun toggleView(isGrid: Boolean) {
+        viewModelScope.launch {
+            userDataRepository.useGrid(isGrid)
+        }
+    }
+
     init {
-        val id = savedStateHandle.get<String>("imdbID") ?: ""
+        val id = savedStateHandle.get<String>("id") ?: "0"
+        val type = savedStateHandle.get<String>("type") ?: "movie"
 
         getMovie(id = id.toInt())
     }
@@ -129,4 +163,17 @@ class MovieDetailsViewModel @Inject constructor(
 
     }
 
+
+}
+
+/**
+ * Represents the settings which the user can edit within the app.
+ */
+data class UserEditableSettings(
+    val showVideos: Boolean = false,
+)
+
+sealed interface SettingsUiState {
+    object Loading : SettingsUiState
+    data class Success(val settings: UserEditableSettings) : SettingsUiState
 }

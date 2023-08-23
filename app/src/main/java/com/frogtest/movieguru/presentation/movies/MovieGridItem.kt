@@ -37,6 +37,7 @@ fun MovieGridItem(
                     .fillMaxSize()
                     .defaultMinSize(minHeight = 190.dp),
                 placeholder = painterResource(id = R.drawable.baseline_image_24),
+                error = painterResource(id = R.drawable.baseline_image_24),
             )
 
             Spacer(modifier = Modifier.height(4.dp))

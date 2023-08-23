@@ -7,10 +7,12 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import com.frogtest.movieguru.data.cache.MovieDatabase
 import com.frogtest.movieguru.data.cache.entity.movie.MovieEntity
+import com.frogtest.movieguru.data.cache.entity.search.MovieSearchEntity
 import com.frogtest.movieguru.data.mappers.toMovie
 import com.frogtest.movieguru.data.mappers.toMovieDetails
 import com.frogtest.movieguru.data.mappers.toMovieDetailsEntity
 import com.frogtest.movieguru.data.network.MovieNetworkMediator
+import com.frogtest.movieguru.data.network.SearchMovieNetworkMediator
 import com.frogtest.movieguru.data.network.api.TMDBMovieAPI
 import com.frogtest.movieguru.domain.model.movie.Movie
 import com.frogtest.movieguru.domain.model.movie_details.MovieDetails
@@ -31,12 +33,31 @@ class MovieRepositoryImpl @Inject constructor(
 
     private val TAG = "MovieRepositoryImpl"
 
+    private val movieDao = movieDatabase.movieDao
+    private val movieDetailsDao = movieDatabase.movieDetailsDao
+    private val movieSearchDao = movieDatabase.movieSearchDao
+
     @OptIn(ExperimentalPagingApi::class)
     override fun getMovies(sort: Boolean, query: String): Flow<PagingData<MovieEntity>> {
-        val pagingSourceFactory = { movieDatabase.movieDao.getMovies() }
+        val pagingSourceFactory = { movieDao.getMovies() }
         return Pager(
             config = PagingConfig(pageSize = 20),
             remoteMediator = MovieNetworkMediator(
+                movieApi = tmDBApi,
+                movieDb = movieDatabase,
+                sort = sort,
+                query = query
+            ),
+            pagingSourceFactory = pagingSourceFactory
+        ).flow
+    }
+
+    @OptIn(ExperimentalPagingApi::class)
+    override fun searchMovies(sort: Boolean, query: String): Flow<PagingData<MovieSearchEntity>> {
+        val pagingSourceFactory = { movieSearchDao.getMovies() }
+        return Pager(
+            config = PagingConfig(pageSize = 20),
+            remoteMediator = SearchMovieNetworkMediator(
                 movieApi = tmDBApi,
                 movieDb = movieDatabase,
                 sort = sort,
@@ -54,13 +75,57 @@ class MovieRepositoryImpl @Inject constructor(
 
             Log.d(TAG, "id: $id")
 
-            val cacheMovie = movieDatabase.movieDao.getMovie(id)
+            val cacheMovie = movieDao.getMovie(id)
 
-            if (cacheMovie == null) {
-                emit(Resource.Error("Movie not found"))
+//            if (cacheMovie == null) {
+//                emit(Resource.Error("Movie not found"))
+//                return@flow
+//            }
+
+            cacheMovie?.let {
+                emit(Resource.Success(cacheMovie.toMovie()))
+                emit(Resource.Loading(false))
                 return@flow
             }
-            emit(Resource.Success(cacheMovie.toMovie()))
+
+            val networkMovie = try {
+                val response = tmDBApi.getMovieDetails(id = id)
+
+                response
+
+            } catch (e: IOException) {
+                e.printStackTrace()
+                emit(Resource.Error(e.message ?: "An error occurred"))
+                null
+            } catch (e: HttpException) {
+                e.printStackTrace()
+                emit(Resource.Error(e.message ?: "An error occurred"))
+                null
+            }
+
+            val movie = Movie(
+                adult = networkMovie?.adult ?: false,
+                backdropPath = networkMovie?.backdropPath ?: "",
+                genreIds = networkMovie?.genres?.map { it.id!! } ?: listOf(),
+                id = networkMovie?.id ?: 0,
+                originalLanguage = networkMovie?.originalLanguage ?: "",
+                originalTitle = networkMovie?.originalTitle ?: "",
+                overview = networkMovie?.overview ?: "",
+                popularity = networkMovie?.popularity ?: 0.0,
+                posterPath = networkMovie?.posterPath ?: "",
+                releaseDate = networkMovie?.releaseDate ?: networkMovie?.firstAirDate ?: "",
+                title = networkMovie?.title ?: networkMovie?.name ?: "",
+                video = networkMovie?.video ?: false,
+                voteAverage = networkMovie?.voteAverage ?: 0.0,
+                voteCount = networkMovie?.voteCount ?: 0,
+                mediaType = networkMovie?.releaseDate?.let { "movie" }
+                    ?: networkMovie?.firstAirDate?.let { "tv" } ?: ""
+
+            )
+
+            emit(Resource.Success(movie))
+
+
             emit(Resource.Loading(false))
         }
     }
@@ -75,7 +140,7 @@ class MovieRepositoryImpl @Inject constructor(
 
             Log.d(TAG, "imdbID: $id")
 
-            val cacheMovieDetails = movieDatabase.movieDetailsDao.getMovieDetails(id)
+            val cacheMovieDetails = movieDetailsDao.getMovieDetails(id)
             cacheMovieDetails?.let {
                 emit(Resource.Success(cacheMovieDetails.toMovieDetails()))
             }
@@ -104,11 +169,11 @@ class MovieRepositoryImpl @Inject constructor(
             }
 
             networkMovieDetails?.let {
-                movieDatabase.movieDetailsDao.deleteMovieDetails(id)
-                movieDatabase.movieDetailsDao.insertMovieDetails(it.toMovieDetailsEntity())
+                movieDetailsDao.deleteMovieDetails(id)
+                movieDetailsDao.insertMovieDetails(it.toMovieDetailsEntity())
             }
 
-            val data = movieDatabase.movieDetailsDao.getMovieDetails(id)
+            val data = movieDetailsDao.getMovieDetails(id)
             if (data == null) {
                 emit(Resource.Error("An error occurred"))
             } else {
@@ -120,4 +185,10 @@ class MovieRepositoryImpl @Inject constructor(
     }
 
 
+    override suspend fun clearSearch(): Flow<Resource<Boolean>> {
+        return flow {
+            movieSearchDao.clearAll()
+            emit(Resource.Success(true))
+        }
+    }
 }

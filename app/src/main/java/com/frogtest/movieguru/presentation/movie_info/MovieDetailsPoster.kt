@@ -52,6 +52,7 @@ fun MovieDetailsPoster(movie: Movie, modifier: Modifier = Modifier) {
                     .defaultMinSize(minHeight = 220.dp)
                 ,
                 placeholder = painterResource(id = R.drawable.baseline_image_24),
+                error = painterResource(id = R.drawable.baseline_image_24),
             )
 
             Row(
@@ -68,7 +69,8 @@ fun MovieDetailsPoster(movie: Movie, modifier: Modifier = Modifier) {
                     fontWeight = FontWeight.Bold,
                     style = MaterialTheme.typography.titleMedium,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.fillMaxWidth(.8f)
                 )
                 MovieListItemInfo(
                     modifier = Modifier.weight(3f),
