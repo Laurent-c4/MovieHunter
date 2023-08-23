@@ -12,7 +12,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.ViewList
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -36,6 +38,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.frogtest.movieguru.R
+import com.frogtest.movieguru.presentation.movies.MovieEvent
 import kotlinx.coroutines.job
 
 
@@ -77,14 +80,18 @@ fun SearchWidget(
                     ),
                 )
             }
-            IconButton(
-                onClick = onFilterClicked,
-
-                )
-            {
+//            IconButton(onClick = onFilterClicked)
+//            {
+//                Icon(
+//                    imageVector = Icons.Default.FilterList,
+//                    contentDescription = "Filter",
+//                    tint = MaterialTheme.colorScheme.onSurface
+//                )
+//            }
+            IconButton(onClick = {onSearchEvent(SearchEvent.OnToggleView(!isGridView))} ) {
                 Icon(
-                    imageVector = Icons.Default.FilterList,
-                    contentDescription = "Filter",
+                    imageVector = if (isGridView) Icons.Default.ViewList else Icons.Default.GridView,
+                    contentDescription = "View",
                     tint = MaterialTheme.colorScheme.onSurface
                 )
             }
