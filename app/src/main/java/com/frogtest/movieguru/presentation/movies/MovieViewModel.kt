@@ -84,6 +84,12 @@ class MovieViewModel @Inject constructor(
                 }
             }
 
+            is MovieEvent.OnMovieTVBackupStored -> {
+            viewModelScope.launch {
+                userSettingsRepository.setMovieTVBackup(event.movieTV)
+            }
+        }
+
             is MovieEvent.OnSortToggled -> {
                 viewModelScope.launch {
                     userSettingsRepository.toggleSort(event.sort)

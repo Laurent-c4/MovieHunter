@@ -38,4 +38,6 @@ interface UserSettingsRepository {
     suspend fun toggleShowVideos(showVideos: Boolean)
 
     suspend fun setMovieTV(movieTV: String)
+
+    suspend fun setMovieTVBackup(movieTV: String)
 }

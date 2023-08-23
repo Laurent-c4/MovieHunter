@@ -37,11 +37,6 @@ fun SearchScreen(
 
     val movies = viewModel.searchedMovies.collectAsLazyPagingItems()
 
-    val originalMovieTV = remember { mutableStateOf("") }
-    LaunchedEffect(key1 = Unit){
-        originalMovieTV.value = movieTV
-    }
-
     val showFiltersDialog = remember { mutableStateOf(false) }
     if (showFiltersDialog.value) {
         SearchFilterDialog(
@@ -60,7 +55,7 @@ fun SearchScreen(
                     onSearchEvent = viewModel::onSearchEvent,
                     navigateBack = {
                         viewModel.onSearchEvent(SearchEvent.ClearSearch)
-                        viewModel.onSearchEvent(SearchEvent.OnMovieTVToggled(originalMovieTV.value))
+                        viewModel.onSearchEvent(SearchEvent.OnMovieTVToggled(viewModel.getBackupMovieTV()))
                         navController.popBackStack()
                                    },
                     isGridView = useGrid,
@@ -101,7 +96,7 @@ fun SearchScreen(
 
     BackHandler {
         viewModel.onSearchEvent(SearchEvent.ClearSearch)
-        viewModel.onSearchEvent(SearchEvent.OnMovieTVToggled(originalMovieTV.value))
+        viewModel.onSearchEvent(SearchEvent.OnMovieTVToggled(viewModel.getBackupMovieTV()))
         navController.popBackStack()
     }
 }

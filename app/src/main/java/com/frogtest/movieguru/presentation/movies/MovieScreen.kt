@@ -1,7 +1,6 @@
 package com.frogtest.movieguru.presentation.movies
 
 import android.util.Log
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -46,7 +45,12 @@ fun MovieScreen(
                 isGridView = useGrid,
                 movieEvent = viewModel::onMovieEvent,
                 onSettingsClicked = showSettingsDialog,
-                onSearchClicked = { navController.navigate(Screen.SearchScreen.route) },
+                onSearchClicked = {
+                    viewModel.onMovieEvent(
+                        MovieEvent.OnMovieTVBackupStored(movieTV)
+                    )
+                    navController.navigate(Screen.SearchScreen.route)
+                },
                 scrollBehavior = scrollBehavior
             )
         },
@@ -66,7 +70,10 @@ fun MovieScreen(
                     MovieEvent.OnMovieTVToggled(MovieTVFilterConfig.TV)
                 )
             },
-            onClickMovie = {id ->navController.navigate("movie/${movieTV}/${id}")},
+            onClickMovie = { id ->
+                navController.navigate("movie/${movieTV}/${id}")
+
+            },
         )
     }
 

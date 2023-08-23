@@ -27,4 +27,5 @@ data class UserSettings(
     val sort: Boolean,
     val showVideos: Boolean,
     val movieTV: String,
+    val movieTVBackup: String,
 )

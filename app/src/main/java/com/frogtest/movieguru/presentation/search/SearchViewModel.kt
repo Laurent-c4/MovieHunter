@@ -41,6 +41,7 @@ class SearchViewModel @Inject constructor(
                     settings = UserEditableSettings(
                         sort = userData.sort,
                         movieTV = userData.movieTV,
+                        movieTVBackup = userData.movieTVBackup,
                         useGrid = userData.useGrid,
                     ),
                 )
@@ -151,11 +152,22 @@ class SearchViewModel @Inject constructor(
         }
     }
 
+    fun getBackupMovieTV(): String {
+        return settingsUiState.value.let { settingsUiState ->
+            if (settingsUiState is SettingsUiState.Success) {
+                settingsUiState.settings.movieTVBackup
+            } else {
+                "movie"
+            }
+        }
+    }
+
 }
 
 data class UserEditableSettings(
     val sort: Boolean,
     val movieTV: String,
+    val movieTVBackup: String,
     val useGrid: Boolean,
 )
 

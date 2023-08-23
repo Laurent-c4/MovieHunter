@@ -56,5 +56,9 @@ class UserSettingsRepositoryImpl @Inject constructor(
         preferencesDataSource.setMovieTvFilter(movieTV)
     }
 
+    override suspend fun setMovieTVBackup(movieTV: String) {
+        preferencesDataSource.setMovieTvFilterBackup(movieTV)
+    }
+
 
 }
