@@ -312,6 +312,17 @@ private fun LinksPanel() {
                     url = FEEDBACK_URL,
                 )
             }
+            Column(
+                Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Row {
+                    TextLink(
+                        text = stringResource(R.string.developer),
+                        url = DEVELOPER_URL,
+                    )
+                }
+            }
         }
     }
 }
@@ -334,3 +345,4 @@ private fun TextLink(text: String, url: String) {
 }
 
 private const val FEEDBACK_URL = "https://github.com/Laurent-c4/MovieGuru/issues"
+private const val DEVELOPER_URL = "https://laurentj.netlify.app"
