@@ -1,6 +1,7 @@
 package com.frogtest.movieguru.presentation.search
 
 import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -96,6 +97,12 @@ fun SearchScreen(
                     "MovieScreen: Load Error" + (movies.loadState.refresh as LoadState.Error).error.message
                 )
         }
+    }
+
+    BackHandler {
+        viewModel.onSearchEvent(SearchEvent.ClearSearch)
+        viewModel.onSearchEvent(SearchEvent.OnMovieTVToggled(originalMovieTV.value))
+        navController.popBackStack()
     }
 }
 
