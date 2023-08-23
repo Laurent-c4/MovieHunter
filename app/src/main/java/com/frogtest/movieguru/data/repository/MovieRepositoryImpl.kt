@@ -38,30 +38,33 @@ class MovieRepositoryImpl @Inject constructor(
     private val movieSearchDao = movieDatabase.movieSearchDao
 
     @OptIn(ExperimentalPagingApi::class)
-    override fun getMovies(sort: Boolean, query: String): Flow<PagingData<MovieEntity>> {
+    override fun getMovies(sort: Boolean, type: String): Flow<PagingData<MovieEntity>> {
         val pagingSourceFactory = { movieDao.getMovies() }
         return Pager(
             config = PagingConfig(pageSize = 20),
             remoteMediator = MovieNetworkMediator(
                 movieApi = tmDBApi,
                 movieDb = movieDatabase,
+                type = type,
                 sort = sort,
-                query = query
+
             ),
             pagingSourceFactory = pagingSourceFactory
         ).flow
     }
 
     @OptIn(ExperimentalPagingApi::class)
-    override fun searchMovies(sort: Boolean, query: String): Flow<PagingData<MovieSearchEntity>> {
+    override fun searchMovies(sort: Boolean, type:String, query: String): Flow<PagingData<MovieSearchEntity>> {
         val pagingSourceFactory = { movieSearchDao.getMovies() }
         return Pager(
             config = PagingConfig(pageSize = 20),
             remoteMediator = SearchMovieNetworkMediator(
                 movieApi = tmDBApi,
                 movieDb = movieDatabase,
+                query = query,
+                type = type,
                 sort = sort,
-                query = query
+
             ),
             pagingSourceFactory = pagingSourceFactory
         ).flow

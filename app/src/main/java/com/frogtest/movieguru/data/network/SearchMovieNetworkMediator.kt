@@ -17,11 +17,14 @@ class SearchMovieNetworkMediator(
     private val movieApi: TMDBMovieAPI,
     private val movieDb: MovieDatabase,
     private val sort: Boolean = false,
+    private val type: String = "movie",
     private val query: String
 ): RemoteMediator<Int, MovieSearchEntity>() {
 
     private val movieDao = movieDb.movieSearchDao
     private val remoteKeyDao = movieDb.movieSearchRemoteKeyDao
+
+    private val TAG = "SearchMovieNetworkMediator"
     override suspend fun load(
         loadType: LoadType,
         state: PagingState<Int, MovieSearchEntity>
@@ -52,7 +55,9 @@ class SearchMovieNetworkMediator(
                 }
             }
 
-            val response = movieApi.searchMovies(page = currentPage, query = query).results?: emptyList()
+            Log.d(TAG, "load: type: $type")
+
+            val response = movieApi.searchMovies(type = type, page = currentPage, query = query).results?: emptyList()
 
             val endOfPaginationReached = response.isEmpty()
 

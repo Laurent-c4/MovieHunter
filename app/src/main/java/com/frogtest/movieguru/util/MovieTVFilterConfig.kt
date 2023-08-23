@@ -14,17 +14,11 @@
  * limitations under the License.
  */
 
-package com.frogtest.movieguru.domain.model
+package com.frogtest.movieguru.util
 
-/**
- * Class summarizing user interest data
- */
-data class UserSettings(
-    val darkThemeConfig: String,
-    val useDynamicColor: Boolean,
-    val useGrid: Boolean,
-    val useFingerPrint: Boolean,
-    val sort: Boolean,
-    val showVideos: Boolean,
-    val movieTV: String,
-)
+object MovieTVFilterConfig {
+    const val ALL = "all"
+    const val MOVIE = "movie"
+    const val TV = "tv"
+    const val PEOPLE = "person"
+}

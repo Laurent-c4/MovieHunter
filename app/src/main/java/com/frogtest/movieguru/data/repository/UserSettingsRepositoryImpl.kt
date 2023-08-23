@@ -52,5 +52,9 @@ class UserSettingsRepositoryImpl @Inject constructor(
         preferencesDataSource.toggleShowVideos(showVideos)
     }
 
+    override suspend fun setMovieTV(movieTV: String) {
+        preferencesDataSource.setMovieTvFilter(movieTV)
+    }
+
 
 }

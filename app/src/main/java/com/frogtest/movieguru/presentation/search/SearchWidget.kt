@@ -4,7 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -13,9 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.FilterList
-import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.ViewList
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -49,10 +46,10 @@ fun SearchWidget(
     onSearchEvent: (SearchEvent) -> Unit,
     navigateBack: () -> Unit,
     onFilterClicked: () -> Unit,
-    useGridView: Boolean,
+    isGridView: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    val focusRequester = remember { FocusRequester()}
+    val focusRequester = remember { FocusRequester() }
 
     Surface(
         modifier = modifier
@@ -70,7 +67,10 @@ fun SearchWidget(
             horizontalArrangement = Arrangement.SpaceBetween,
             modifier = Modifier.fillMaxWidth(),
         ) {
-            IconButton(onClick = navigateBack) {
+            IconButton(onClick = {
+                onSearchEvent(SearchEvent.ClearSearch)
+                navigateBack()
+            }) {
                 Icon(
                     imageVector = Icons.Default.ArrowBack,
                     contentDescription = stringResource(
@@ -102,9 +102,8 @@ fun SearchWidget(
                 onValueChange = { onSearchEvent(SearchEvent.OnSearchQueryChange(it)) },
                 placeholder = {
                     Text(
-                        modifier = Modifier
+                        modifier = Modifier,
 //                        .alpha(alpha = ContentAlpha.medium)
-                        ,
                         text = "Search here...",
                     )
                 },
@@ -136,7 +135,8 @@ fun SearchWidget(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Close,
-                            contentDescription = "Close Icon",)
+                            contentDescription = "Close Icon",
+                        )
                     }
                 },
                 keyboardOptions = KeyboardOptions(
@@ -174,6 +174,6 @@ fun SearchWidgetPreview() {
         onSearchEvent = {},
         navigateBack = {},
         onFilterClicked = {},
-        useGridView = false
+        isGridView = false
     )
 }

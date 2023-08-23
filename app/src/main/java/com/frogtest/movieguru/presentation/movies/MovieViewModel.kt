@@ -12,6 +12,7 @@ import com.frogtest.movieguru.domain.model.movie.Movie
 import com.frogtest.movieguru.domain.repository.AuthRepository
 import com.frogtest.movieguru.domain.repository.MovieRepository
 import com.frogtest.movieguru.domain.repository.UserSettingsRepository
+import com.frogtest.movieguru.presentation.search.SearchEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -38,6 +39,7 @@ class MovieViewModel @Inject constructor(
                 SettingsUiState.Success(
                     settings = UserEditableSettings(
                         sort = userData.sort,
+                        movieTV = userData.movieTV,
                     ),
                 )
             }
@@ -75,6 +77,13 @@ class MovieViewModel @Inject constructor(
                 }
             }
 
+            is MovieEvent.OnMovieTVToggled -> {
+                viewModelScope.launch {
+                    userSettingsRepository.setMovieTV(event.movieTV)
+                    getMovies(event.movieTV)
+                }
+            }
+
             is MovieEvent.OnSortToggled -> {
                 viewModelScope.launch {
                     userSettingsRepository.toggleSort(event.sort)
@@ -87,24 +96,32 @@ class MovieViewModel @Inject constructor(
 //                    getMovies(userSettingsRepository.userSettings.first().sort, searchQuery.value)
                 }
             }
+
+            is MovieEvent.OnToggleView -> {
+                viewModelScope.launch {
+                    toggleView(event.isGrid)
+                }
+            }
         }
     }
 
     init {
         viewModelScope.launch {
-            getMovies()
+            getMovies(userSettingsRepository.userSettings.first().movieTV)
         }
     }
 
 
-    fun updateSearchQuery(query: String) {
+    private fun updateSearchQuery(query: String) {
         _searchQuery.value = query
     }
 
 
-    fun getMovies() {
+    private fun getMovies(type: String) {
         viewModelScope.launch {
-            repository.getMovies().map { pagingData ->
+            repository.getMovies(
+                type = type
+            ).map { pagingData ->
                 pagingData.map { movieEntity ->
                     movieEntity.toMovie()
                 }
@@ -114,7 +131,7 @@ class MovieViewModel @Inject constructor(
         }
     }
 
-    fun toggleView(isGrid: Boolean) {
+    private fun toggleView(isGrid: Boolean) {
         viewModelScope.launch {
             userSettingsRepository.useGrid(isGrid)
         }
@@ -124,6 +141,7 @@ class MovieViewModel @Inject constructor(
 
 data class UserEditableSettings(
     val sort: Boolean,
+    val movieTV: String,
 )
 
 sealed interface SettingsUiState {

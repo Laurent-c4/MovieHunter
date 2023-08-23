@@ -1,4 +1,4 @@
-package com.frogtest.movieguru.presentation.movies
+package com.frogtest.movieguru.components.movie_listing.item
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row

@@ -18,16 +18,13 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.frogtest.movieguru.R
 import com.frogtest.movieguru.domain.model.movie.Movie
-import com.frogtest.movieguru.presentation.movies.MovieListItemInfo
+import com.frogtest.movieguru.components.movie_listing.item.MovieListItemInfo
 
 @Composable
 fun MovieDetailsPoster(movie: Movie, modifier: Modifier = Modifier) {

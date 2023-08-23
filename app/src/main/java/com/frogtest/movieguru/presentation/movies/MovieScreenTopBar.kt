@@ -3,7 +3,6 @@ package com.frogtest.movieguru.presentation.movies
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ViewList
@@ -14,7 +13,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
@@ -25,7 +23,7 @@ import coil.compose.AsyncImage
 fun MovieScreenTopBar(
     photoUrl: String? = null,
     isGridView: Boolean,
-    onViewToggled: (Boolean) -> Unit,
+    movieEvent: (MovieEvent) -> Unit,
     onSearchClicked: () -> Unit,
     onSettingsClicked: () -> Unit
 ) {
@@ -53,7 +51,7 @@ fun MovieScreenTopBar(
 //                    tint = MaterialTheme.colorScheme.onSurface
 //                )
 //            }
-            IconButton(onClick = {onViewToggled(!isGridView)} ) {
+            IconButton(onClick = {movieEvent(MovieEvent.OnToggleView(!isGridView))} ) {
                 Icon(
                     imageVector = if (isGridView) Icons.Default.ViewList else Icons.Default.GridView,
                     contentDescription = "View",

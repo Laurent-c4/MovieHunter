@@ -20,7 +20,7 @@ class MovieNetworkMediator(
     private val movieApi: TMDBMovieAPI,
     private val movieDb: MovieDatabase,
     private val sort: Boolean = false,
-    private val query: String
+    private val type: String = "movie"
 ): RemoteMediator<Int, MovieEntity>() {
 
     private val movieDao = movieDb.movieDao
@@ -55,7 +55,7 @@ class MovieNetworkMediator(
                 }
             }
 
-            val response = movieApi.getTrendingMovies(page = currentPage).results?: emptyList()
+            val response = movieApi.getTrendingMovies(type = type,page = currentPage).results?: emptyList()
 
             val endOfPaginationReached = response.isEmpty()
 

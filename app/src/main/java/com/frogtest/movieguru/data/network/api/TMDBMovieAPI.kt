@@ -24,7 +24,7 @@ interface TMDBMovieAPI {
         @Query("query") query: String,
         @Query("page") page: Int = 1,
         @Query("language") language: String = "en-US",
-        @Query("include_adult") includeAdult: Boolean = false,
+//        @Query("include_adult") includeAdult: Boolean = false,
         @Query("api_key") apiKey: String = API_KEY,
     ): MoviesResponse
 

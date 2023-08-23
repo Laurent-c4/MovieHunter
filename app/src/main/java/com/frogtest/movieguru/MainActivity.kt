@@ -61,6 +61,7 @@ import com.frogtest.movieguru.presentation.verify_email.VerifyEmailScreen
 import com.frogtest.movieguru.ui.theme.MovieGuruTheme
 import com.frogtest.movieguru.util.DarkThemeConfig
 import com.frogtest.movieguru.util.ConnectivityObserver
+import com.frogtest.movieguru.util.MovieTVFilterConfig
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
@@ -116,6 +117,7 @@ class MainActivity : FragmentActivity() {
             val useFingerprint = shouldUseFingerPrint(uiState = uiState)
             val showVideos = shouldShowVideos(uiState = uiState)
             val useGrid = shouldUseGrid(uiState = uiState)
+            val movieTV = shouldShowMovieOrTV(uiState = uiState)
             val useDynamicColor = useDynamicColor(uiState = uiState)
             val showSettingsDialog = remember { mutableStateOf(false) }
             val snackbarHostState = remember { SnackbarHostState() }
@@ -158,6 +160,7 @@ class MainActivity : FragmentActivity() {
                         NavSetUp(
                             navController = navController,
                             useGrid = useGrid,
+                            movieTV = movieTV,
                             useFingerPrint = useFingerprint,
                             showSettingsDialog = { showSettingsDialog.value = true },
                             showVideos = showVideos,
@@ -197,6 +200,7 @@ class MainActivity : FragmentActivity() {
         useGrid: Boolean,
         useFingerPrint: Boolean,
         showVideos: Boolean,
+        movieTV: String,
         showSettingsDialog: () -> Unit = {},
         paddingValues: PaddingValues,
     ) {
@@ -301,6 +305,7 @@ class MainActivity : FragmentActivity() {
                     navController = navController,
                     viewModel = viewModel,
                     useGrid = useGrid,
+                    movieTV = movieTV,
                     showSettingsDialog = showSettingsDialog
                 )
             }
@@ -321,6 +326,7 @@ class MainActivity : FragmentActivity() {
                     viewModel = viewModel,
                     navController = navController,
                     useGrid = useGrid,
+                    movieTV = movieTV
                 )
             }
         }
@@ -426,6 +432,14 @@ class MainActivity : FragmentActivity() {
     ): Boolean = when (uiState) {
         MainActivityUiState.Loading -> false
         is MainActivityUiState.Success -> uiState.userSettings.useGrid
+    }
+
+    @Composable
+    private fun shouldShowMovieOrTV(
+        uiState: MainActivityUiState,
+    ): String = when (uiState) {
+        MainActivityUiState.Loading -> MovieTVFilterConfig.MOVIE
+        is MainActivityUiState.Success -> uiState.userSettings.movieTV
     }
 
     @Composable

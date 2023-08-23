@@ -10,9 +10,9 @@ import kotlinx.coroutines.flow.Flow
 
 interface MovieRepository {
 
-    fun getMovies(sort: Boolean = false, query: String = ""): Flow<PagingData<MovieEntity>>
+    fun getMovies(sort: Boolean = false, type: String): Flow<PagingData<MovieEntity>>
 
-    fun searchMovies(sort: Boolean = false, query: String = ""): Flow<PagingData<MovieSearchEntity>>
+    fun searchMovies(sort: Boolean = false, type:String, query: String): Flow<PagingData<MovieSearchEntity>>
 
     suspend fun getMovie(
         id: Int

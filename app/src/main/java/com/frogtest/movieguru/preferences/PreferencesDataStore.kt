@@ -8,6 +8,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import com.frogtest.movieguru.MovieApp
 import com.frogtest.movieguru.domain.model.UserSettings
 import com.frogtest.movieguru.util.DarkThemeConfig
+import com.frogtest.movieguru.util.MovieTVFilterConfig
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.flow.*
@@ -39,8 +40,7 @@ constructor(app: MovieApp) {
             darkThemeConfig  = preferences[DATA_THEME_CONFIG] ?: DarkThemeConfig.FOLLOW_SYSTEM,
             sort = preferences[SORT] ?: false,
             showVideos = preferences[SHOW_VIDEOS] ?: true,
-
-
+            movieTV = preferences[MOVIE_TV_FILTER] ?: MovieTVFilterConfig.MOVIE
         )
     }
 
@@ -92,6 +92,14 @@ constructor(app: MovieApp) {
         }
     }
 
+    fun setMovieTvFilter(movieTvFilter: String) {
+        scope.launch {
+            datastore.edit { preferences ->
+                preferences[MOVIE_TV_FILTER] = movieTvFilter
+            }
+        }
+    }
+
     companion object {
         private val USE_GRID = booleanPreferencesKey("use_grid_key")
         private val USE_DYNAMIC_COLOR = booleanPreferencesKey("use_dynamic_color_key")
@@ -99,6 +107,7 @@ constructor(app: MovieApp) {
         private val USE_FINGERPRINT = booleanPreferencesKey("use_fingerprint_key")
         private val SORT = booleanPreferencesKey("sort_key")
         private val SHOW_VIDEOS = booleanPreferencesKey("show_videos_key")
+        private val MOVIE_TV_FILTER = stringPreferencesKey("movie_tv_filter_key")
 
     }
 }

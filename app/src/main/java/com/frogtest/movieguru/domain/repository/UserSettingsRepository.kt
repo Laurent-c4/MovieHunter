@@ -36,4 +36,6 @@ interface UserSettingsRepository {
     suspend fun toggleSort(sort: Boolean)
 
     suspend fun toggleShowVideos(showVideos: Boolean)
+
+    suspend fun setMovieTV(movieTV: String)
 }

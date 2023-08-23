@@ -1,5 +1,6 @@
 package com.frogtest.movieguru.presentation.search
 
+import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -18,6 +19,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -38,6 +40,8 @@ class SearchViewModel @Inject constructor(
                 SettingsUiState.Success(
                     settings = UserEditableSettings(
                         sort = userData.sort,
+                        movieTV = userData.movieTV,
+                        useGrid = userData.useGrid,
                     ),
                 )
             }
@@ -69,11 +73,9 @@ class SearchViewModel @Inject constructor(
             is SearchEvent.OnSearchQueryChange -> {
                 if (searchQuery.value != event.query) {
                     updateSearchQuery(event.query)
-
                     searchJob?.cancel()
-                    if (event.query.isBlank()) return
                     searchJob = viewModelScope.launch {
-                        searchMovies(event.query)
+                        searchMovies(event.query, userSettingsRepository.userSettings.first().movieTV)
                     }
                 }
             }
@@ -81,14 +83,20 @@ class SearchViewModel @Inject constructor(
             is SearchEvent.OnSortToggled -> {
                 viewModelScope.launch {
                     userSettingsRepository.toggleSort(event.sort)
-                    searchMovies(searchQuery.value)
+                    searchMovies(searchQuery.value, userSettingsRepository.userSettings.first().movieTV)
+                }
+            }
+
+            is SearchEvent.OnMovieTVToggled -> {
+                viewModelScope.launch {
+                    userSettingsRepository.setMovieTV(event.movieTV)
+                    searchMovies(searchQuery.value, event.movieTV)
                 }
             }
 
             is SearchEvent.OnSearchInitiated -> {
                 viewModelScope.launch {
-                    if(searchQuery.value.isBlank()) return@launch
-                    searchMovies(searchQuery.value)
+                    searchMovies(searchQuery.value, userSettingsRepository.userSettings.first().movieTV)
                 }
             }
 
@@ -106,14 +114,18 @@ class SearchViewModel @Inject constructor(
         }
     }
 
-    fun updateSearchQuery(query: String) {
+    private fun updateSearchQuery(query: String) {
         _searchQuery.value = query
     }
 
 
-    fun searchMovies(query: String) {
+    private fun searchMovies(query: String, type: String) {
+        if(query.isBlank()) return
         viewModelScope.launch {
-            repository.searchMovies(query = query)
+            repository.searchMovies(
+                query = query,
+                type = type,
+            )
                 .cachedIn(viewModelScope).map {
                     it.map { movieSearchEntity ->
                         movieSearchEntity.toMovie()
@@ -125,7 +137,7 @@ class SearchViewModel @Inject constructor(
         }
     }
 
-    fun clearSearch() {
+    private fun clearSearch() {
         viewModelScope.launch {
             repository.clearSearch().collect{
                 _searchedMovies.value = PagingData.empty()
@@ -133,7 +145,7 @@ class SearchViewModel @Inject constructor(
         }
     }
 
-    fun toggleView(isGrid: Boolean) {
+    private fun toggleView(isGrid: Boolean) {
         viewModelScope.launch {
             userSettingsRepository.useGrid(isGrid)
         }
@@ -143,6 +155,8 @@ class SearchViewModel @Inject constructor(
 
 data class UserEditableSettings(
     val sort: Boolean,
+    val movieTV: String,
+    val useGrid: Boolean,
 )
 
 sealed interface SettingsUiState {
