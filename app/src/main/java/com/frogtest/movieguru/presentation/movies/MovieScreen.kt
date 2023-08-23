@@ -1,13 +1,16 @@
 package com.frogtest.movieguru.presentation.movies
 
 import android.util.Log
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.navigation.NavController
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -29,10 +32,13 @@ fun MovieScreen(
 ) {
 
     val movies = viewModel.searchedMovies.collectAsLazyPagingItems()
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
 
     Scaffold(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar =
         {
             MovieScreenTopBar(
@@ -40,7 +46,8 @@ fun MovieScreen(
                 isGridView = useGrid,
                 movieEvent = viewModel::onMovieEvent,
                 onSettingsClicked = showSettingsDialog,
-                onSearchClicked = { navController.navigate(Screen.SearchScreen.route) }
+                onSearchClicked = { navController.navigate(Screen.SearchScreen.route) },
+                scrollBehavior = scrollBehavior
             )
         },
     ) { paddingValues ->

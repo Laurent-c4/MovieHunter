@@ -12,6 +12,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -25,7 +26,8 @@ fun MovieScreenTopBar(
     isGridView: Boolean,
     movieEvent: (MovieEvent) -> Unit,
     onSearchClicked: () -> Unit,
-    onSettingsClicked: () -> Unit
+    onSettingsClicked: () -> Unit,
+    scrollBehavior: TopAppBarScrollBehavior,
 ) {
     TopAppBar(
         title = { Text(text = "Movie Guru") },
@@ -77,6 +79,7 @@ fun MovieScreenTopBar(
                     )
                 }
             }
-        }
+        },
+        scrollBehavior = scrollBehavior
     )
 }
