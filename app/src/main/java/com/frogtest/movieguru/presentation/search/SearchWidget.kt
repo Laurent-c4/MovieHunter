@@ -68,7 +68,6 @@ fun SearchWidget(
             modifier = Modifier.fillMaxWidth(),
         ) {
             IconButton(onClick = {
-                onSearchEvent(SearchEvent.ClearSearch)
                 navigateBack()
             }) {
                 Icon(
@@ -128,7 +127,6 @@ fun SearchWidget(
                             if (text.isNotEmpty()) {
                                 onSearchEvent(SearchEvent.OnSearchQueryChange(""))
                             } else {
-                                onSearchEvent(SearchEvent.ClearSearch)
                                 navigateBack()
                             }
                         }

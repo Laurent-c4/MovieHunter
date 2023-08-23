@@ -36,6 +36,10 @@ fun SearchScreen(
 
     val movies = viewModel.searchedMovies.collectAsLazyPagingItems()
 
+    val originalMovieTV = remember { mutableStateOf("") }
+    LaunchedEffect(key1 = Unit){
+        originalMovieTV.value = movieTV
+    }
 
     val showFiltersDialog = remember { mutableStateOf(false) }
     if (showFiltersDialog.value) {
@@ -53,7 +57,11 @@ fun SearchScreen(
                 SearchWidget(
                     text = viewModel.searchQuery.value,
                     onSearchEvent = viewModel::onSearchEvent,
-                    navigateBack = { navController.popBackStack() },
+                    navigateBack = {
+                        viewModel.onSearchEvent(SearchEvent.ClearSearch)
+                        viewModel.onSearchEvent(SearchEvent.OnMovieTVToggled(originalMovieTV.value))
+                        navController.popBackStack()
+                                   },
                     isGridView = useGrid,
                     onFilterClicked = { showFiltersDialog.value = true },
                     modifier = Modifier.padding(8.dp)
