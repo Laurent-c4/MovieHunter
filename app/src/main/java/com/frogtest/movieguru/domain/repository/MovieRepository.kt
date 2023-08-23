@@ -15,7 +15,8 @@ interface MovieRepository {
     fun searchMovies(sort: Boolean = false, type:String, query: String): Flow<PagingData<MovieSearchEntity>>
 
     suspend fun getMovie(
-        id: Int
+        id: Int,
+        type: String
     ): Flow<Resource<Movie>>
 
     suspend fun getMovieDetails(

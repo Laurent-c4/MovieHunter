@@ -62,7 +62,7 @@ class MovieDetailsViewModel @Inject constructor(
         val id = savedStateHandle.get<String>("id") ?: "0"
         val type = savedStateHandle.get<String>("type") ?: "movie"
 
-        getMovie(id = id.toInt())
+        getMovie(id = id.toInt(), type = type)
     }
 
     val getSignedInUser get() = authRepository.getSignedInUser()
@@ -76,10 +76,11 @@ class MovieDetailsViewModel @Inject constructor(
 
     fun getMovie(
         id: Int,
+        type: String
     ) {
         viewModelScope.launch {
             repository
-                .getMovie(id = id)
+                .getMovie(id = id, type = type)
                 .collect { result ->
                     when (result) {
                         is Resource.Success -> {

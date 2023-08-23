@@ -42,6 +42,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun MovieDetailsScreen(
     id: String,
+    type: String,
     viewModel: MovieDetailsViewModel,
     showVideos: Boolean,
     navigateBack: () -> Unit,
@@ -75,7 +76,7 @@ fun MovieDetailsScreen(
                     SwipeRefresh(
                         modifier = Modifier.weight(1f),
                         state = swipeRefreshState,
-                        onRefresh = { viewModel.getMovie(id.toInt()) },
+                        onRefresh = { viewModel.getMovie(id.toInt(), type) },
                         indicator = { refreshState, refreshTrigger ->
                             SwipeRefreshIndicator(
                                 state = refreshState,

@@ -85,7 +85,7 @@ fun SearchScreen(
                     SearchEvent.OnMovieTVToggled(MovieTVFilterConfig.TV)
                 )
             },
-            onClickMovie = {id -> navController.navigate("movie/${id}")}
+            onClickMovie = {id ->navController.navigate("movie/${movieTV}/${id}")},
         )
     }
 

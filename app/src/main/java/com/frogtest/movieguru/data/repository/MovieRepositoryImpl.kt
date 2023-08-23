@@ -71,7 +71,8 @@ class MovieRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getMovie(
-        id: Int
+        id: Int,
+        type: String
     ): Flow<Resource<Movie>> {
         return flow {
             emit(Resource.Loading(true))
@@ -92,7 +93,7 @@ class MovieRepositoryImpl @Inject constructor(
             }
 
             val networkMovie = try {
-                val response = tmDBApi.getMovieDetails(id = id)
+                val response = tmDBApi.getMovieDetails(id = id, type = type)
 
                 response
 

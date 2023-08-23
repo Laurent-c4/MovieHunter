@@ -309,12 +309,14 @@ class MainActivity : FragmentActivity() {
                     showSettingsDialog = showSettingsDialog
                 )
             }
-            composable("movie/{id}") { backStackEntry ->
+            composable("movie/{type}/{id}") { backStackEntry ->
                 val id = backStackEntry.arguments?.getString("id")
+                val type = backStackEntry.arguments?.getString("type")
                 Log.d(TAG, "NavSetUp: Movie ID -  $id")
                 val viewModel = hiltViewModel<MovieDetailsViewModel>()
                 MovieDetailsScreen(
                     id = id ?: "",
+                    type = type ?: "",
                     viewModel = viewModel,
                     navigateBack = { navController.popBackStack() },
                     showVideos = showVideos,
