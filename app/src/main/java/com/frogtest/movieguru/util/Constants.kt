@@ -46,4 +46,7 @@ object Constants {
 
     //Error Messages
     const val SENSITIVE_OPERATION_MESSAGE = "This operation is sensitive and requires recent authentication. Log in again before retrying this request."
+
+    const val VIDEO_START_DELAY = "VIDEO_START_DELAY"
+    const val VIDEO_ID = "VIDEO_ID"
 }

@@ -1,10 +1,14 @@
 package com.frogtest.movieguru
 
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
@@ -164,8 +168,7 @@ class MainActivity : FragmentActivity() {
                             useFingerPrint = useFingerprint,
                             showSettingsDialog = { showSettingsDialog.value = true },
                             showVideos = showVideos,
-                            paddingValues = it,
-                        )
+                            paddingValues = it)
 
                     }
 
@@ -319,8 +322,7 @@ class MainActivity : FragmentActivity() {
                     type = type ?: "",
                     viewModel = viewModel,
                     navigateBack = { navController.popBackStack() },
-                    showVideos = showVideos,
-                )
+                    showVideos = showVideos)
             }
             composable(Screen.SearchScreen.route) {
                 val viewModel = hiltViewModel<SearchViewModel>()

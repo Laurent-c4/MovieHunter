@@ -1,6 +1,8 @@
 package com.frogtest.movieguru.presentation.movie_info
 
+import android.content.Intent
 import android.util.Log
+import androidx.activity.result.ActivityResultLauncher
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -45,8 +47,7 @@ fun MovieDetailsScreen(
     type: String,
     viewModel: MovieDetailsViewModel,
     showVideos: Boolean,
-    navigateBack: () -> Unit,
-) {
+    navigateBack: () -> Unit) {
 
     val TAG = "MovieDetailsScreen"
 
@@ -172,7 +173,10 @@ fun MovieDetailsScreen(
                                         state = pagerState,
                                         key = { ytVideos[it].key ?: "" },
                                     ) { index ->
-                                        YoutubePlayer(youtubeVideoID = videos[index].key ?: "")
+                                        YoutubePlayer(
+                                            youtubeVideoID = videos[index].key ?: "",
+//                                            launcher  = launcher
+                                        )
                                     }
 
                                 }
