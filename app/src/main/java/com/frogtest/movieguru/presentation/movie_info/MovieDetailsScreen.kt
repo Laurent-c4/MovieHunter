@@ -1,8 +1,10 @@
 package com.frogtest.movieguru.presentation.movie_info
 
 import android.content.Intent
+import android.os.Build
 import android.util.Log
 import androidx.activity.result.ActivityResultLauncher
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -39,6 +41,9 @@ import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import kotlin.math.roundToInt
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -47,7 +52,8 @@ fun MovieDetailsScreen(
     type: String,
     viewModel: MovieDetailsViewModel,
     showVideos: Boolean,
-    navigateBack: () -> Unit) {
+    navigateBack: () -> Unit
+) {
 
     val TAG = "MovieDetailsScreen"
 
@@ -65,7 +71,7 @@ fun MovieDetailsScreen(
             MovieDetailsTopBar(
                 title = state.movie?.title ?: "",
                 showVideos = showVideos,
-                onShowVideosClicked = {viewModel.toggleShowVideos(!showVideos)},
+                onShowVideosClicked = { viewModel.toggleShowVideos(!showVideos) },
                 navigateBack = navigateBack
             )
         },
@@ -102,42 +108,55 @@ fun MovieDetailsScreen(
                                 item {
                                     Text(
                                         text = movie.overview,
-                                        Modifier.padding(start = 8.dp, end = 8.dp)
+                                        Modifier.padding(start = 8.dp, end = 8.dp, bottom = 8.dp)
                                     )
                                 }
 
-                                item {
-                                    Spacer(modifier = Modifier.padding(8.dp))
+                                val rating: Int = (movie.voteAverage * 10).roundToInt()
+                                if (rating > 0)
+                                    item {
+                                        Text(
+                                            text = "Rating: $rating %",
+                                            Modifier.padding(
+                                                start = 8.dp,
+                                                end = 8.dp,
+                                                bottom = 8.dp
+                                            )
+                                        )
+                                    }
+
+
+                                var date = movie.releaseDate
+                                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O) {
+                                    val d = LocalDate.parse(date)
+                                    val formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy")
+                                    date = d.format(formatter)
                                 }
 
                                 item {
                                     Text(
-                                        text = "Popularity: ${movie.popularity}",
-                                        Modifier.padding(start = 8.dp, end = 8.dp)
+                                        text = "Release Date: $date",
+                                        Modifier.padding(start = 8.dp, end = 8.dp, bottom = 8.dp)
                                     )
-
                                 }
 
-                                item {
-                                    Spacer(modifier = Modifier.padding(8.dp))
-                                }
-
-                                item {
-                                    Text(
-                                        text = "Released: ${movie.releaseDate}",
-                                        Modifier.padding(start = 8.dp, end = 8.dp)
-                                    )
+                                state.movieDetails?.genres?.let { genres ->
+                                    item {
+                                        Text(
+                                            text = "Genres: ${genres.joinToString { it.name ?: "" }}",
+                                            Modifier.padding(
+                                                start = 8.dp,
+                                                end = 8.dp,
+                                                bottom = 8.dp
+                                            )
+                                        )
+                                    }
                                 }
                             }
 
-                            item {
-                                Spacer(modifier = Modifier.padding(8.dp))
-                            }
-
-                            item {
-                                state.movieDetails?.credits?.cast?.let { cast ->
-                                    val actors = cast.map { actor -> actor.name }
-
+                            state.movieDetails?.credits?.cast?.let { cast ->
+                                val actors = cast.map { actor -> actor.name }
+                                item {
                                     Text(
                                         text = "Cast: ${actors.take(5).joinToString()}",
                                         Modifier.padding(start = 8.dp, end = 8.dp)
