@@ -1,21 +1,22 @@
 package com.frogtest.movieguru.presentation.movie_info
 
-import android.content.Intent
+import android.content.Context
 import android.os.Build
 import android.util.Log
-import androidx.activity.result.ActivityResultLauncher
-import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeight
+import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -32,11 +33,19 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
+import com.frogtest.movieguru.R
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
@@ -61,6 +70,8 @@ fun MovieDetailsScreen(
     val scope = rememberCoroutineScope()
     val state = viewModel.state
     val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = state.isLoading)
+    val showVideo = remember { mutableStateOf(false) }
+    val vidId = remember { mutableStateOf("") }
 
     Log.d(TAG, "MovieDetailsScreen: ${state.movieDetails})")
 
@@ -192,10 +203,36 @@ fun MovieDetailsScreen(
                                         state = pagerState,
                                         key = { ytVideos[it].key ?: "" },
                                     ) { index ->
-                                        YoutubePlayer(
-                                            youtubeVideoID = videos[index].key ?: "",
-//                                            launcher  = launcher
-                                        )
+//                                        YoutubePlayer(
+//                                            youtubeVideoID = videos[index].key ?: "",
+////                                            launcher  = launcher
+//                                        )
+                                        val w = (480f / LocalDensity.current.density * 2.7f) - 100
+                                        val h = (360 / LocalDensity.current.density * 2.7f) - 138
+
+                                        Box(
+                                            modifier = Modifier
+                                                .requiredWidth(w.dp)
+                                                .requiredHeight(h.dp)
+                                                .clip(shape = RoundedCornerShape(30.dp))
+                                                .padding(8.dp)
+                                                .clickable {
+                                                    vidId.value = videos[index].key ?: ""
+                                                    showVideo.value = true
+                                                }
+                                        ) {
+                                            AsyncImage(
+                                                model = "https://img.youtube.com/vi/${videos[index].key ?: ""}/0.jpg",
+                                                placeholder = painterResource(id = R.drawable.baseline_movie_24),
+                                                error = painterResource(R.drawable.baseline_movie_24),
+                                                contentDescription = "Youtube Thumbnail",
+                                                contentScale = ContentScale.FillWidth,
+                                                modifier = Modifier
+//                                                .fillMaxWidth(w)
+                                                    .fillMaxHeight(h)
+                                                    .clip(shape = RoundedCornerShape(30.dp))
+                                            )
+                                        }
                                     }
 
                                 }
@@ -275,8 +312,34 @@ fun MovieDetailsScreen(
                     }
                 }
             }
+
+            if (showVideo.value) {
+
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = 0.8f))
+                        .clickable {
+                            showVideo.value = false
+                        },
+                ) {
+                    YoutubePlayer(
+                        youtubeVideoID = vidId.value,
+                    )
+                }
+
+
+            }
         }
     }
+
+
+}
+
+@Composable
+fun videoDialog(context: Context, videoID: String) {
 
 
 }

@@ -96,7 +96,7 @@ fun YoutubePlayer(
                     youTubePlayerView.initialize(object : AbstractYouTubePlayerListener() {
                         override fun onReady(youTubePlayer: YouTubePlayer) {
                             ytPlayer = youTubePlayer
-                            youTubePlayer.cueVideo(youtubeVideoID, videoStartDelay)
+                            youTubePlayer.loadVideo(youtubeVideoID, videoStartDelay)
                         }
 
                         override fun onCurrentSecond(youTubePlayer: YouTubePlayer, second: Float) {
