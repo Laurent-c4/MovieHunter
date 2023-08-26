@@ -322,7 +322,7 @@ class MainActivity : FragmentActivity() {
                     type = type ?: "",
                     viewModel = viewModel,
                     navigateBack = { navController.popBackStack() },
-                    showVideos = showVideos)
+                )
             }
             composable(Screen.SearchScreen.route) {
                 val viewModel = hiltViewModel<SearchViewModel>()

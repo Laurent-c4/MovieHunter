@@ -1,6 +1,7 @@
 package com.frogtest.movieguru.presentation.movie_info
 
 import android.util.Log
+import androidx.compose.foundation.gestures.DraggableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -45,6 +46,29 @@ class MovieDetailsViewModel @Inject constructor(
                 started = SharingStarted.Eagerly,
                 initialValue = SettingsUiState.Loading,
             )
+
+    private val _tabIndex =  mutableStateOf(0)
+    val tabIndex = _tabIndex
+    val tabs = listOf("About", "Videos")
+
+    var isSwipeToTheLeft: Boolean = false
+    private val draggableState = DraggableState { delta ->
+        isSwipeToTheLeft = delta > 0
+    }
+
+    private val _dragState = mutableStateOf(draggableState)
+    val dragState = _dragState
+
+    fun updateTabIndexBasedOnSwipe() {
+        _tabIndex.value = when (isSwipeToTheLeft) {
+            true -> Math.floorMod(_tabIndex.value!!.plus(1), tabs.size)
+            false -> Math.floorMod(_tabIndex.value!!.minus(1), tabs.size)
+        }
+    }
+
+    fun updateTabIndex(i: Int) {
+        _tabIndex.value = i
+    }
 
     fun toggleShowVideos(show: Boolean) {
         viewModelScope.launch {

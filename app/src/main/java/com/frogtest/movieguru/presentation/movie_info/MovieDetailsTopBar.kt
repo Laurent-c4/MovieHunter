@@ -11,6 +11,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -21,9 +22,8 @@ import coil.compose.AsyncImage
 @OptIn(ExperimentalMaterial3Api::class)
 fun MovieDetailsTopBar(
     title: String = "Movie Guru",
-    showVideos: Boolean = false,
-    onShowVideosClicked: (show: Boolean) -> Unit,
-    navigateBack: () -> Unit
+    navigateBack: () -> Unit,
+    scrollBehavior: TopAppBarScrollBehavior,
 ) {
     TopAppBar(
         title = { Text(
@@ -38,20 +38,6 @@ fun MovieDetailsTopBar(
                     tint = MaterialTheme.colorScheme.onSurface
                 )
             }
-        },
-        actions =
-        {
-
-            IconButton(onClick = {onShowVideosClicked(!showVideos)})
-            {
-
-                    Icon(
-                        imageVector = Icons.Default.VideoLibrary,
-                        contentDescription = "Show Videos",
-                        tint = if(showVideos) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
-                    )
-                }
-
-        }
+        }, scrollBehavior = scrollBehavior
     )
 }
