@@ -1,5 +1,6 @@
 package com.frogtest.movieguru.presentation.movie_info
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -34,6 +35,7 @@ import com.frogtest.movieguru.domain.model.movie_details.MovieVideo
 fun MovieVideos(
     modifier: Modifier = Modifier,
     movieVideos: List<MovieVideo>?,
+    navigateBack: () -> Unit
 ) {
 
     val showVideo = remember { mutableStateOf(false) }
@@ -111,5 +113,11 @@ fun MovieVideos(
 
 
         }
+    }
+
+    BackHandler {
+        if (showVideo.value) {
+            showVideo.value = false
+        } else navigateBack()
     }
 }

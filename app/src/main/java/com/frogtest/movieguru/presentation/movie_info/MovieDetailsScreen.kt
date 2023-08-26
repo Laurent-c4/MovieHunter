@@ -99,8 +99,7 @@ fun MovieDetailsScreen(
                                 viewModel.updateTabIndexBasedOnSwipe()
                             }),
                     movieVideos = ytVideos,
-
-
+                    navigateBack = navigateBack
                     )
             }
         }
