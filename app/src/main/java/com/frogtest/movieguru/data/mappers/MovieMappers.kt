@@ -171,12 +171,14 @@ fun MovieDetailsDto.toMovieDetailsEntity(): MovieDetailsEntity {
         credits = Credits(
             credits?.cast?.map {
                 Cast(
+                    id = it.id,
                     name = it.name,
                     profilePath = it.profilePath,
                     )
             },
             credits?.crew?.map {
                 Crew(
+                    id = it.id,
                     name = it.name,
                     profilePath = it.profilePath,
                 )
