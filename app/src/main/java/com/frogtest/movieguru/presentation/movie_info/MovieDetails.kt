@@ -1,8 +1,11 @@
 package com.frogtest.movieguru.presentation.movie_info
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,8 +21,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import coil.compose.AsyncImage
 import com.frogtest.movieguru.domain.model.movie_details.Cast
 import com.google.accompanist.swiperefresh.SwipeRefresh
@@ -181,9 +186,17 @@ fun MovieDetails(
 
 @Composable
 fun ActorCard(actor: Cast) {
+    val url = "https://www.google.com/search?q=${actor.name}"
+    val launchResourceIntent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+    val context = LocalContext.current
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.padding(4.dp)
+        modifier = Modifier
+            .padding(4.dp)
+            .clickable {
+                ContextCompat.startActivity(context,launchResourceIntent,null)
+            }
     ) {
             AsyncImage(
                 model = "https://image.tmdb.org/t/p/w300${actor.profilePath}",
@@ -193,11 +206,9 @@ fun ActorCard(actor: Cast) {
                 modifier = Modifier
 //                    .padding(4.dp)
                     .height(200.dp)
-//                    .weight(1f)
             )
         Text(
             text = actor.name ?: "",
-//            Modifier.padding(4.dp)
         )
     }
 }
