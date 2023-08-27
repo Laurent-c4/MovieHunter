@@ -33,7 +33,6 @@ android {
         properties.load(project.rootProject.file("local.properties").inputStream())
 
         buildConfigField("String", "TMDB_API_KEY", "\"${properties.getProperty("TMDB_API_KEY")}\"")
-        buildConfigField("String", "OMDB_API_KEY", "\"${properties.getProperty("OMDB_API_KEY")}\"")
 
     }
 
