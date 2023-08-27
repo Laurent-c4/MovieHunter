@@ -11,7 +11,7 @@ This is a movie search app that allows users to search for movies and view the m
 * [Contributing](#contributing)
 
 ## APK
-[Download](https://drive.google.com/file/d/1cDAPPJNNRjv3A2CENHXzfADlNiaCnWRH/view?usp=sharing)
+[Download](https://drive.google.com/uc?export=download&id=1wJbqyT4BrC9tn5slz78orIWAU__ezpEE)
 
 ## Installation
 Clone the repo and open in Android Studio.
