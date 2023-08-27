@@ -17,9 +17,9 @@
 -dontwarn com.google.android.gms.**
 -dontwarn com.google.firebase.**
 
--keep class com.frogtest.movieguru.data.network.dto.** { *; }
--keep class com.frogtest.movieguru.data.cache.entity.** { *; }
--keep class com.frogtest.movieguru.domain.model.** { *; }
+-keep class com.c4entertainment.moviehunter.data.network.dto.** { *; }
+-keep class com.c4entertainment.moviehunter.data.cache.entity.** { *; }
+-keep class com.c4entertainment.moviehunter.domain.model.** { *; }
 
 # Uncomment this to preserve the line number information for
 # debugging stack traces.

@@ -9,7 +9,7 @@ plugins {
 }
 
 android {
-    namespace = "com.frogtest.movieguru"
+    namespace = "com.c4entertainment.moviehunter"
     compileSdk = 33
 
     buildFeatures {
@@ -17,7 +17,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.frogtest.movieguru"
+        applicationId = "com.c4entertainment.moviehunter"
         minSdk = 24
         targetSdk = 33
         versionCode = 1
