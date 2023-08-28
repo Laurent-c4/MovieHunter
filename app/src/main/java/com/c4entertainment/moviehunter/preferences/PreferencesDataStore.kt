@@ -37,7 +37,7 @@ constructor(app: MovieApp) {
         UserSettings(
             useGrid = preferences[USE_GRID] ?: false,
             useDynamicColor = preferences[USE_DYNAMIC_COLOR] ?: true,
-            useFingerPrint = preferences[USE_FINGERPRINT] ?: true,
+            useFingerPrint = preferences[USE_FINGERPRINT] ?: false,
             darkThemeConfig  = preferences[DATA_THEME_CONFIG] ?: DarkThemeConfig.FOLLOW_SYSTEM,
             sort = preferences[SORT] ?: false,
             showVideos = preferences[SHOW_VIDEOS] ?: true,
