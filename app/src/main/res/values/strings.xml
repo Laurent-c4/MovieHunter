@@ -1,6 +1,5 @@
 <resources>
     <string name="app_name">Movie Hunter</string>
-    <string name="default_web_client_id">236441284768-prbs2hg1onselgd7ilec2ngbj3qfsc8d.apps.googleusercontent.com</string>
     <string name="feedback">Issues and Feedback</string>
     <string name="developer">Developer</string>
     <string name="dismiss_dialog_button_text">Ok</string>

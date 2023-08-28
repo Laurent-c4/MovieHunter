@@ -3,6 +3,7 @@ package com.c4entertainment.moviehunter.data.repository
 import android.content.Context
 import android.content.Intent
 import android.content.IntentSender
+import com.c4entertainment.moviehunter.BuildConfig
 import com.c4entertainment.moviehunter.R
 import com.c4entertainment.moviehunter.domain.repository.AuthRepository
 import com.c4entertainment.moviehunter.domain.repository.ReloadUserResponse
@@ -104,7 +105,7 @@ class AuthRepositoryImpl @Inject constructor(
             .setGoogleIdTokenRequestOptions(
                 BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
                     .setSupported(true)
-                    .setServerClientId(context.getString(R.string.default_web_client_id))
+                    .setServerClientId(BuildConfig.GOOGLE_SERVER_CLIENT_ID)
                     .setFilterByAuthorizedAccounts(false)
                     .build()
             )
