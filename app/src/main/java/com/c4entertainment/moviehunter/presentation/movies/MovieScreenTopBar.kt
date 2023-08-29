@@ -26,7 +26,7 @@ import com.c4entertainment.moviehunter.R
 fun MovieScreenTopBar(
     photoUrl: String? = null,
     isGridView: Boolean,
-    movieEvent: (MovieEvent) -> Unit,
+    toggleView: () -> Unit,
     onSearchClicked: () -> Unit,
     onSettingsClicked: () -> Unit,
     scrollBehavior: TopAppBarScrollBehavior,
@@ -55,7 +55,7 @@ fun MovieScreenTopBar(
 //                    tint = MaterialTheme.colorScheme.onSurface
 //                )
 //            }
-            IconButton(onClick = {movieEvent(MovieEvent.OnToggleView(!isGridView))} ) {
+            IconButton(onClick = toggleView ) {
                 Icon(
                     imageVector = if (isGridView) Icons.Default.ViewList else Icons.Default.GridView,
                     contentDescription = "View",

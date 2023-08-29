@@ -113,13 +113,11 @@ class MainActivity : FragmentActivity() {
         setContent {
             val darkTheme = shouldUseDarkTheme(uiState)
             val systemUiController = rememberSystemUiController()
-            val useFingerprint = shouldUseFingerPrint(uiState = uiState)
-            val showVideos = shouldShowVideos(uiState = uiState)
-            val useGrid = shouldUseGrid(uiState = uiState)
-            val movieTV = shouldShowMovieOrTV(uiState = uiState)
             val useDynamicColor = useDynamicColor(uiState = uiState)
-            val showSettingsDialog = remember { mutableStateOf(false) }
             val snackbarHostState = remember { SnackbarHostState() }
+            val showSettingsDialog = remember { mutableStateOf(false) }
+            val useFingerprint = shouldUseFingerPrint(uiState = uiState)
+
 
             val status by connectivityObserver.observe().collectAsState(
                 initial = ConnectivityObserver.Status.Unavailable
@@ -158,11 +156,8 @@ class MainActivity : FragmentActivity() {
 
                         NavSetUp(
                             navController = navController,
-                            useGrid = useGrid,
-                            movieTV = movieTV,
                             useFingerPrint = useFingerprint,
                             showSettingsDialog = { showSettingsDialog.value = true },
-                            showVideos = showVideos,
                             paddingValues = it)
 
                     }
@@ -195,10 +190,7 @@ class MainActivity : FragmentActivity() {
     @Composable
     private fun NavSetUp(
         navController: NavHostController,
-        useGrid: Boolean,
         useFingerPrint: Boolean,
-        showVideos: Boolean,
-        movieTV: String,
         showSettingsDialog: () -> Unit = {},
         paddingValues: PaddingValues,
     ) {
@@ -211,23 +203,8 @@ class MainActivity : FragmentActivity() {
         ) {
 
             composable(Screen.SignInScreen.route) {
-                val viewModel = hiltViewModel<SignInViewModel>()
-                val state by viewModel.state.collectAsStateWithLifecycle()
 
-                LaunchedEffect(key1 = Unit) {
-                    if (viewModel.getSignedInUser !== null) {
-                        if (viewModel.isEmailVerified) {
-                            checkBiometricsAndNavigate(
-                                navController = navController,
-                                useFingerprint = useFingerPrint
-                            )
-                        } else {
-                            navController.navigate(Screen.VerifyEmailScreen.route) {
-                                popUpTo(navController.graph.id) { inclusive = true }
-                            }
-                        }
-                    }
-                }
+                val viewModel = hiltViewModel<SignInViewModel>()
 
                 val launcher = rememberLauncherForActivityResult(
                     contract = ActivityResultContracts.StartIntentSenderForResult(),
@@ -240,28 +217,10 @@ class MainActivity : FragmentActivity() {
                                 viewModel.onSignInResult(signInResult)
                             }
                         }
-
                     }
                 )
 
-                LaunchedEffect(key1 = state.isSignInSuccessful) {
-                    if (state.isSignInSuccessful) {
-                        if (viewModel.isEmailVerified) {
-                            checkBiometricsAndNavigate(
-                                navController = navController,
-                                useFingerprint = useFingerPrint
-                            )
-                            viewModel.resetState()
-                        } else {
-                            navController.navigate(Screen.VerifyEmailScreen.route) {
-                                popUpTo(navController.graph.id) { inclusive = true }
-                            }
-                        }
-                    }
-                }
-
                 SignInScreen(
-                    state = state,
                     onGoogleSignInClick = {
                         lifecycleScope.launch {
                             val signInIntentSender = viewModel.googleSignInIntentSender()
@@ -272,14 +231,15 @@ class MainActivity : FragmentActivity() {
                             )
                         }
                     },
-                    onPasswordSignInClick = { email, password ->
-                        viewModel.signInWithEmailAndPassword(email, password)
-                    },
-                    navigateToForgotPasswordScreen = {
-                        Toast.makeText(applicationContext, "To be implemented", Toast.LENGTH_SHORT)
-                            .show()
-                    },
-                    navigateToSignUpScreen = { navController.navigate(Screen.SignUpScreen.route) }
+                    navController = navController,
+                    viewModel = viewModel,
+                    checkBiometricsAndNavigate = {
+                        checkBiometricsAndNavigate(
+                            useFingerprint = useFingerPrint,
+                            navController = navController
+                        )
+                    }
+
                 )
             }
             composable(Screen.VerifyEmailScreen.route) {
@@ -288,7 +248,8 @@ class MainActivity : FragmentActivity() {
                         navController.navigate(Screen.MovieScreen.route) {
                             popUpTo(navController.graph.id) { inclusive = true }
                         }
-                    }, showSettingsDialog = showSettingsDialog,
+                    },
+                    showSettingsDialog = showSettingsDialog,
                     navigateBack = { navController.popBackStack() }
                 )
             }
@@ -302,8 +263,6 @@ class MainActivity : FragmentActivity() {
                 MovieScreen(
                     navController = navController,
                     viewModel = viewModel,
-                    useGrid = useGrid,
-                    movieTV = movieTV,
                     showSettingsDialog = showSettingsDialog
                 )
             }
@@ -324,8 +283,6 @@ class MainActivity : FragmentActivity() {
                 SearchScreen(
                     viewModel = viewModel,
                     navController = navController,
-                    useGrid = useGrid,
-                    movieTV = movieTV
                 )
             }
         }
@@ -426,35 +383,11 @@ class MainActivity : FragmentActivity() {
     }
 
     @Composable
-    private fun shouldUseGrid(
-        uiState: MainActivityUiState,
-    ): Boolean = when (uiState) {
-        MainActivityUiState.Loading -> false
-        is MainActivityUiState.Success -> uiState.userSettings.useGrid
-    }
-
-    @Composable
-    private fun shouldShowMovieOrTV(
-        uiState: MainActivityUiState,
-    ): String = when (uiState) {
-        MainActivityUiState.Loading -> MovieTVFilterConfig.MOVIE
-        is MainActivityUiState.Success -> uiState.userSettings.movieTV
-    }
-
-    @Composable
     private fun shouldUseFingerPrint(
         uiState: MainActivityUiState,
     ): Boolean = when (uiState) {
         MainActivityUiState.Loading -> false
         is MainActivityUiState.Success -> uiState.userSettings.useFingerPrint
-    }
-
-    @Composable
-    private fun shouldShowVideos(
-        uiState: MainActivityUiState,
-    ): Boolean = when (uiState) {
-        MainActivityUiState.Loading -> false
-        is MainActivityUiState.Success -> uiState.userSettings.showVideos
     }
 
     @Composable

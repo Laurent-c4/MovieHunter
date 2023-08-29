@@ -36,8 +36,8 @@ class MovieViewModel @Inject constructor(
             .map { userData ->
                 SettingsUiState.Success(
                     settings = UserEditableSettings(
-                        sort = userData.sort,
                         movieTV = userData.movieTV,
+                        useGrid = userData.useGrid,
                     ),
                 )
             }
@@ -144,8 +144,8 @@ class MovieViewModel @Inject constructor(
 }
 
 data class UserEditableSettings(
-    val sort: Boolean,
     val movieTV: String,
+    val useGrid: Boolean,
 )
 
 sealed interface SettingsUiState {
