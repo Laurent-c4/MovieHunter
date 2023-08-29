@@ -15,7 +15,8 @@ import com.c4entertainment.moviehunter.util.Constants.VERIFY_EMAIL_MESSAGE
 @ExperimentalComposeUiApi
 fun SignUpScreen(
     viewModel: SignUpViewModel,
-    navigateBack: () -> Unit
+    navigateBack: () -> Unit,
+    navigateToAuthCheck: () -> Unit
 ) {
     val context = LocalContext.current
 
@@ -35,7 +36,7 @@ fun SignUpScreen(
         showVerifyEmailMessage = {
             Toast.makeText(context, VERIFY_EMAIL_MESSAGE, Toast.LENGTH_LONG).show()
         },
-        navigateBack = navigateBack
+        navigateBack = navigateToAuthCheck
     )
 
     SendEmailVerification()

@@ -28,15 +28,6 @@ fun VerifyEmailTopBar(
 ) {
     TopAppBar(
         title = { Text(text = title) },
-        navigationIcon = {
-            IconButton(onClick = navigateBack ) {
-                Icon(
-                    imageVector = Icons.Default.ArrowBack,
-                    contentDescription = "Back",
-                    tint = MaterialTheme.colorScheme.onSurface
-                )
-            }
-        },
         actions =
         {
 

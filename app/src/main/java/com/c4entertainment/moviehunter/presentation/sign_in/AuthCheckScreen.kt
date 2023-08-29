@@ -20,58 +20,30 @@ import androidx.navigation.NavController
 import com.c4entertainment.moviehunter.navigation.Screen
 import com.c4entertainment.moviehunter.presentation.sign_in.components.SignInContents
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun SignInScreen(
-    onGoogleSignInClick: () -> Unit,
+fun AuthCheckScreen(
     checkBiometricsAndNavigate: () -> Unit,
     viewModel: SignInViewModel = hiltViewModel(),
     navController: NavController,
 ) {
 
-    val TAG = "SignInScreen"
-
-    val context = LocalContext.current
-
-
-    val state by viewModel.state.collectAsStateWithLifecycle()
-
     Box(modifier = Modifier
         .fillMaxSize()
         .padding(16.dp),
-        contentAlignment = Alignment.Center
-    ) {
-           SignInContents(
-               padding = PaddingValues(16.dp),
-               passwordSignIn = { email, password ->
-                   viewModel.signInWithEmailAndPassword(email, password)
-               },
-               googleSignIn = onGoogleSignInClick,
-               navigateToForgotPasswordScreen = {
-                   Toast.makeText(context, "To be implemented", Toast.LENGTH_SHORT)
-                       .show()
-               },
-               navigateToSignUpScreen = { navController.navigate(Screen.SignUpScreen.route) },
-               errorMessage = state.message
-           )
-       }
+    )
 
-    LaunchedEffect(key1 = state.message) {
-        Log.d(TAG, "SignInScreen: ${state.message}")
-        state.message?.let { error ->
-            Toast.makeText(context, error, Toast.LENGTH_LONG).show()
-        }
-    }
-
-    LaunchedEffect(key1 = state.isSignInSuccessful) {
-        if (state.isSignInSuccessful) {
+    LaunchedEffect(key1 = Unit) {
+        if (viewModel.getSignedInUser !== null) {
             if (viewModel.isEmailVerified) {
                 checkBiometricsAndNavigate()
-                viewModel.resetState()
             } else {
                 navController.navigate(Screen.VerifyEmailScreen.route) {
                     popUpTo(navController.graph.id) { inclusive = true }
                 }
+            }
+        } else {
+            navController.navigate(Screen.SignInScreen.route) {
+                popUpTo(navController.graph.id) { inclusive = true }
             }
         }
     }

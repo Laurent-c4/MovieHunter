@@ -52,6 +52,7 @@ import com.c4entertainment.moviehunter.presentation.movies.MovieViewModel
 import com.c4entertainment.moviehunter.presentation.profile.SettingsDialog
 import com.c4entertainment.moviehunter.presentation.search.SearchScreen
 import com.c4entertainment.moviehunter.presentation.search.SearchViewModel
+import com.c4entertainment.moviehunter.presentation.sign_in.AuthCheckScreen
 import com.c4entertainment.moviehunter.presentation.sign_in.SignInScreen
 import com.c4entertainment.moviehunter.presentation.sign_in.SignInViewModel
 import com.c4entertainment.moviehunter.presentation.sign_up.SignUpScreen
@@ -172,6 +173,7 @@ class MainActivity : FragmentActivity() {
 
                     // If user is not connected to the internet show a snack bar to inform them.
                     val notConnectedMessage = stringResource(R.string.not_connected)
+                    Log.d(TAG, "onCreate isOffline: $isOffline")
                     LaunchedEffect(isOffline) {
                         if (isOffline) {
                             snackbarHostState.showSnackbar(
@@ -196,11 +198,22 @@ class MainActivity : FragmentActivity() {
     ) {
         NavHost(
             navController = navController,
-            startDestination = Screen.SignInScreen.route,
+            startDestination = Screen.AuthCheckScreen.route,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues = paddingValues),
         ) {
+            composable(Screen.AuthCheckScreen.route) {
+                AuthCheckScreen(
+                    checkBiometricsAndNavigate = {
+                        checkBiometricsAndNavigate(
+                            useFingerprint = useFingerPrint,
+                            navController = navController
+                        )
+                    },
+                    navController = navController,
+                )
+            }
 
             composable(Screen.SignInScreen.route) {
 
@@ -256,7 +269,15 @@ class MainActivity : FragmentActivity() {
             composable(Screen.SignUpScreen.route) {
                 val viewModel = hiltViewModel<SignUpViewModel>()
 
-                SignUpScreen(viewModel = viewModel, navigateBack = { navController.popBackStack() })
+                SignUpScreen(
+                    viewModel = viewModel,
+                    navigateBack = { navController.popBackStack() },
+                    navigateToAuthCheck = {
+                        navController.navigate(Screen.AuthCheckScreen.route) {
+                            popUpTo(navController.graph.id) { inclusive = true }
+                        }
+                    },
+                )
             }
             composable(Screen.MovieScreen.route) {
                 val viewModel = hiltViewModel<MovieViewModel>()
@@ -396,14 +417,15 @@ class MainActivity : FragmentActivity() {
     ) {
         val isUserSignedOut = viewModel.getAuthState().collectAsState().value
         val currentDestination = navController.currentBackStackEntry?.destination?.route
+        val authRoutes = listOf(
+            Screen.SignInScreen.route,
+            Screen.SignUpScreen.route,
+            Screen.ForgotPasswordScreen.route,
+            Screen.AuthCheckScreen.route,
+        )
 
-        currentDestination?.let {
-            if (
-                isUserSignedOut &&
-                currentDestination != Screen.SignInScreen.route &&
-                currentDestination != Screen.SignUpScreen.route &&
-                currentDestination != Screen.ForgotPasswordScreen.route
-            ) {
+        currentDestination?.let { destination ->
+            if (isUserSignedOut && destination !in authRoutes) {
 
                 Log.d(TAG, "AuthState: $currentDestination")
                 navController.navigate(Screen.SignInScreen.route) {

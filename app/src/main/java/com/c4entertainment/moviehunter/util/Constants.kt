@@ -14,6 +14,7 @@ object Constants {
     const val REVOKE_ACCESS_ITEM = "Revoke Access"
 
     //Screens
+    const val AUTH_CHECK_SCREEN = "auth_check_screen"
     const val SIGN_IN_SCREEN = "Sign in"
     const val FORGOT_PASSWORD_SCREEN = "Forgot password"
     const val SIGN_UP_SCREEN = "Sign up"
