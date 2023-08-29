@@ -64,6 +64,7 @@ import com.c4entertainment.moviehunter.util.ConnectivityObserver
 import com.c4entertainment.moviehunter.util.MovieTVFilterConfig
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -176,6 +177,7 @@ class MainActivity : FragmentActivity() {
                     Log.d(TAG, "onCreate isOffline: $isOffline")
                     LaunchedEffect(isOffline) {
                         if (isOffline) {
+                            delay(1000)
                             snackbarHostState.showSnackbar(
                                 message = notConnectedMessage,
                                 duration = SnackbarDuration.Indefinite,
