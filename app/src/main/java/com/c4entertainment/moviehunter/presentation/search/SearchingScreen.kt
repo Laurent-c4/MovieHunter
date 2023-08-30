@@ -13,10 +13,12 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -31,11 +33,12 @@ private const val TAG = "MovieScreen"
 fun SearchScreen(
     navController: NavController,
     viewModel: SearchViewModel,
-    useGrid: Boolean = true,
-    movieTV: String = MovieTVFilterConfig.MOVIE,
 ) {
 
     val movies = viewModel.searchedMovies.collectAsLazyPagingItems()
+    val settingsState by viewModel.settingsUiState.collectAsStateWithLifecycle()
+    val useGrid = shouldUseGrid(settingsState)
+    val movieTV = shouldShowMovieOrTV(settingsState)
 
     val showFiltersDialog = remember { mutableStateOf(false) }
     if (showFiltersDialog.value) {
@@ -99,6 +102,22 @@ fun SearchScreen(
         viewModel.onSearchEvent(SearchEvent.OnMovieTVToggled(viewModel.getBackupMovieTV()))
         navController.popBackStack()
     }
+}
+
+@Composable
+private fun shouldUseGrid(
+    uiState: SettingsUiState,
+): Boolean = when (uiState) {
+    SettingsUiState.Loading -> false
+    is SettingsUiState.Success -> uiState.settings.useGrid
+}
+
+@Composable
+private fun shouldShowMovieOrTV(
+    uiState: SettingsUiState,
+): String = when (uiState) {
+    SettingsUiState.Loading -> MovieTVFilterConfig.MOVIE
+    is SettingsUiState.Success -> uiState.settings.movieTV
 }
 
 

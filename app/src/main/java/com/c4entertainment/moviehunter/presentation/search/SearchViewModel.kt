@@ -36,7 +36,6 @@ class SearchViewModel @Inject constructor(
             .map { userData ->
                 SettingsUiState.Success(
                     settings = UserEditableSettings(
-                        sort = userData.sort,
                         movieTV = userData.movieTV,
                         movieTVBackup = userData.movieTVBackup,
                         useGrid = userData.useGrid,
@@ -162,7 +161,6 @@ class SearchViewModel @Inject constructor(
 }
 
 data class UserEditableSettings(
-    val sort: Boolean,
     val movieTV: String,
     val movieTVBackup: String,
     val useGrid: Boolean,

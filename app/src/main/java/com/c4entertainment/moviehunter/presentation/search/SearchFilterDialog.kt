@@ -115,19 +115,19 @@ private fun FilterPanel(
     settings: UserEditableSettings,
     onSearchEvent: (event: SearchEvent) -> Unit,
 ) {
-    SettingsDialogSectionTitle(text = stringResource(R.string.sort_ascending))
-    Column(Modifier.selectableGroup()) {
-        SettingsDialogThemeChooserRow(
-            text = stringResource(R.string.dynamic_color_yes),
-            selected = settings.sort,
-            onClick = { onSearchEvent(SearchEvent.OnSortToggled(true)) },
-        )
-        SettingsDialogThemeChooserRow(
-            text = stringResource(R.string.dynamic_color_no),
-            selected = !settings.sort,
-            onClick = { onSearchEvent(SearchEvent.OnSortToggled(false)) },
-        )
-    }
+//    SettingsDialogSectionTitle(text = stringResource(R.string.sort_ascending))
+//    Column(Modifier.selectableGroup()) {
+//        SettingsDialogThemeChooserRow(
+//            text = stringResource(R.string.dynamic_color_yes),
+//            selected = settings.sort,
+//            onClick = { onSearchEvent(SearchEvent.OnSortToggled(true)) },
+//        )
+//        SettingsDialogThemeChooserRow(
+//            text = stringResource(R.string.dynamic_color_no),
+//            selected = !settings.sort,
+//            onClick = { onSearchEvent(SearchEvent.OnSortToggled(false)) },
+//        )
+//    }
 }
 
 @Composable
