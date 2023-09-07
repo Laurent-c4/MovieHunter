@@ -68,7 +68,7 @@ fun MovieDetailsScreen(
             }
 
             val ytVideos =
-                state.movieDetails?.videos?.results?.filter { videos -> videos.site == "YouTube" }?.sortedBy { it.publishedAt }
+                state.movieDetails?.videos?.results?.filter { videos -> videos.site == "YouTube" }?.reversed()
 
             when (tabIndex.value) {
                 0 -> MovieDetails(
