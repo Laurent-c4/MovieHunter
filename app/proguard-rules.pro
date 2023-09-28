@@ -224,3 +224,5 @@
   <init>();
 }
 
+-keep public class kotlin.**
+
