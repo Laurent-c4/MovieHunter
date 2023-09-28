@@ -323,7 +323,8 @@ class MainActivity : FragmentActivity() {
                 ) {
                     super.onAuthenticationError(errorCode, errString)
 
-                    if (errorCode == BiometricPrompt.ERROR_NO_BIOMETRICS) {
+                    if (errorCode == BiometricPrompt.ERROR_NO_BIOMETRICS ||
+                        errorCode == BiometricPrompt.ERROR_HW_NOT_PRESENT) {
                         navController.navigate(Screen.MovieScreen.route) {
                             popUpTo(navController.graph.id) { inclusive = true }
                         }
