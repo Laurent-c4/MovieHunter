@@ -27,6 +27,8 @@ apt-get install --no-install-recommends -y --allow-unauthenticated build-essenti
 gem install rake && \
 gem install fastlane && \
 gem install fastlane-plugin-firebase_app_distribution fastlane-plugin-badge && \
+gem install json&& \
+gem install webrick && \
 gem install bundler && \
 # Clean up
 rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
