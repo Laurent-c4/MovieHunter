@@ -1,34 +1,32 @@
-FROM openjdk:11-jdk-slim-buster
+FROM openjdk:17-bullseye
 
-# Just matched `app/build.gradle`
-ENV ANDROID_COMPILE_SDK "30"
+ENV ANDROID_SDK_URL https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
+ENV ANDROID_API_LEVEL android-33
+ENV ANDROID_BUILD_TOOLS_VERSION 33.0.2
+ENV ANDROID_HOME /usr/local/android-sdk-linux
+ENV ANDROID_VERSION 33
+ENV PATH $PATH:$ANDROID_HOME/tools:$ANDROID_HOME/tools/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/cmdline-tools/bin
 
-# Just matched `app/build.gradle`
-ENV ANDROID_BUILD_TOOLS "30.0.2"
-
-# Version from https://developer.android.com/studio/releases/sdk-tools
-ENV ANDROID_SDK_TOOLS "7583922"
-ENV ANDROID_HOME /android-sdk-linux
-ENV PATH="${PATH}:/android-sdk-linux/platform-tools/"
-
-# Install OS packages
-RUN apt-get --quiet update --yes && \
-    apt-get --quiet install --yes wget tar unzip lib32stdc++6 lib32z1 build-essential ruby ruby-dev graphicsmagick
-
-# Install Android SDK
-RUN wget --quiet --output-document=android-sdk.zip "https://dl.google.com/android/repository/commandlinetools-linux-${ANDROID_SDK_TOOLS}_latest.zip" && \
-    unzip -d ${ANDROID_HOME} android-sdk.zip && \
-    yes | ./android-sdk-linux/cmdline-tools/bin/sdkmanager "platforms;android-${ANDROID_COMPILE_SDK}" --sdk_root=android-sdk-linux/ && \
-    yes | ./android-sdk-linux/cmdline-tools/bin/sdkmanager "build-tools;${ANDROID_BUILD_TOOLS}" --sdk_root=android-sdk-linux && \
-    # Clean cache
-    apt-get clean autoclean && \
-    apt-get autoremove --yes && \
-    rm -rf /var/lib/{apt,dpkg,cache,log}/ android-sdk.zip
-
+RUN mkdir "$ANDROID_HOME" .android && \
+    cd "$ANDROID_HOME" && \
+    curl -o sdk.zip $ANDROID_SDK_URL && \
+    unzip sdk.zip && \
+    rm sdk.zip && \
+# Download Android SDK
+yes | sdkmanager --licenses --sdk_root=$ANDROID_HOME && \
+sdkmanager --update --sdk_root=$ANDROID_HOME && \
+sdkmanager --sdk_root=$ANDROID_HOME "build-tools;${ANDROID_BUILD_TOOLS_VERSION}" \
+    "platforms;android-${ANDROID_VERSION}" \
+    "platform-tools" \
+    "extras;android;m2repository" \
+    "extras;google;m2repository" && \
 # Install Fastlane
-COPY Gemfile .
-RUN gem update --system 3.2.3 && \
-    gem install bundler -v 2.3.26  && \
-    bundle install && \
-    gem install fastlane -v 2.206.2 && \
-    gem install fastlane-plugin-firebase_app_distribution fastlane-plugin-badge
+apt-get update && \
+apt-get install --no-install-recommends -y --allow-unauthenticated build-essential git ruby-full && \
+gem install rake && \
+gem install fastlane && \
+gem install bundler && \
+# Clean up
+rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
+apt-get autoremove -y && \
+apt-get clean
