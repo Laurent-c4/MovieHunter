@@ -27,6 +27,7 @@ RUN wget --quiet --output-document=android-sdk.zip "https://dl.google.com/androi
 
 # Install Fastlane
 COPY Gemfile .
-RUN gem install bundler -v 2.3.26 && \
+RUN gem update --system 3.2.3 && \
+    gem install bundler -v 2.3.26  && \
     bundle install && \
     gem install fastlane-plugin-firebase_app_distribution fastlane-plugin-badge
