@@ -25,6 +25,7 @@ apt-get update && \
 apt-get install --no-install-recommends -y --allow-unauthenticated build-essential git ruby-full && \
 gem install rake && \
 gem install fastlane && \
+gem install fastlane-plugin-firebase_app_distribution fastlane-plugin-badge && \
 gem install bundler && \
 # Clean up
 rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
