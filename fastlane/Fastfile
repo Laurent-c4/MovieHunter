@@ -55,6 +55,27 @@ platform :android do
     gradle(task: "testDebugUnitTest")
     end
 
+    desc "Set up a Github release"
+    lane :github_release do |options|
+        begin
+            add_badge_to_icon(environment: ENV["CI_ENVIRONMENT_NAME"])
+            build_release()
+            create_github_release(
+                api_token: ENV["GITHUB_TOKEN"],
+                repo_name: ENV["GITHUB_REPO_NAME"],
+                tag_name: "v#{ENV["CI_PIPELINE_ID"]}",
+                name: "v#{ENV["CI_PIPELINE_ID"]}",
+                description: "Release v#{ENV["CI_PIPELINE_ID"]}",
+                commitish: "master",
+                upload_assets: ["./app/build/outputs/apk/release/app-release.apk"]
+            )
+#             success("Github")
+        rescue  => exception
+#             on_error(exception)
+            UI.user_error!(exception)
+        end
+    end
+
     desc "Submit a new build to Firebase App Distribution"
     lane :firebase_distribution do |options|
         begin
