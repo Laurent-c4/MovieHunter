@@ -42,6 +42,7 @@ jobs:
               ${{ runner.os }}-gradle-
       - run: |
                echo $GOOGLE_SERVICES_JSON | base64 -d -i > app/google-services.json
+               echo $LOCAL_PROPERTIES | base64 -d -i > local.properties
                bundle exec fastlane lint
 
   unit_tests:
