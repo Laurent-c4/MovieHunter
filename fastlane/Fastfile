@@ -60,7 +60,7 @@ platform :android do
         begin
             add_badge_to_icon(environment: ENV["CI_ENVIRONMENT_NAME"])
             build_release()
-            create_github_release(
+            set_github_release(
                 api_token: ENV["GITHUB_TOKEN"],
                 repo_name: ENV["GITHUB_REPO_NAME"],
                 tag_name: "v#{ENV["CI_PIPELINE_ID"]}",
