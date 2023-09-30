@@ -21,6 +21,7 @@ env:
   CI_COMMIT_BEFORE_SHA: ${{ github.event.before }}
   APP_PACKAGE_NAME: ${{ secrets.APP_PACKAGE_NAME }}
   CI_ENVIRONMENT_NAME: ${{ github.workflow }}
+  LOCAL_PROPERTIES: ${{ secrets.LOCAL_PROPERTIES }}
 
 jobs:
   prod_firebase:
@@ -70,6 +71,7 @@ jobs:
           echo $SA_JSON_GP_KEY | base64 -d -i > /tmp/key_gp.json
           echo $KEYSTORE | base64 -d -i > /tmp/my-release-key.keystore
           echo $GOOGLE_SERVICES_JSON | base64 -d -i > app/google-services.json
+          echo $LOCAL_PROPERTIES | base64 -d -i > local.properties
           bundle exec fastlane google_beta
         env:
           BUILD_TASK: "bundle"

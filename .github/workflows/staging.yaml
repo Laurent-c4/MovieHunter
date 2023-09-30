@@ -24,6 +24,7 @@ env:
   BUILD_TASK: "assemble"
   BUILD_TYPE: "debug"
   CI_ENVIRONMENT_NAME: ${{ github.workflow }}
+  LOCAL_PROPERTIES: ${{ secrets.LOCAL_PROPERTIES }}
 
 jobs:
   staging_firebase:
@@ -48,4 +49,5 @@ jobs:
               echo $KEYSTORE | base64 -d -i > /tmp/my-release-key.keystore
               echo $SA_JSON_KEY | base64 -d -i > key_firebase.json
               echo $GOOGLE_SERVICES_JSON | base64 -d -i > app/google-services.json
+              echo $LOCAL_PROPERTIES | base64 -d -i > local.properties
               bundle exec fastlane firebase_distribution
