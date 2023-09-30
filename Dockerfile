@@ -21,16 +21,12 @@ sdkmanager --sdk_root=$ANDROID_HOME "build-tools;${ANDROID_BUILD_TOOLS_VERSION}"
     "extras;android;m2repository" \
     "extras;google;m2repository"
 # Install Fastlane \
-COPY Gemfile .
+COPY Gemfile Gemfile.lock ./
 RUN apt-get update && \
 apt-get install --no-install-recommends -y --allow-unauthenticated build-essential git ruby-full graphicsmagick && \
 gem install bundler && \
 bundle install && \
-gem install rake && \
-gem install fastlane && \
 gem install fastlane-plugin-firebase_app_distribution fastlane-plugin-badge && \
-gem install json&& \
-gem install webrick && \
 # Clean up
 rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
 apt-get autoremove -y && \
