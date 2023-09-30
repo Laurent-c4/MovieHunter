@@ -62,7 +62,7 @@ platform :android do
             build_release()
             set_github_release(
                 api_token: ENV["GITHUB_TOKEN"],
-                repo_name: ENV["GITHUB_REPO_NAME"],
+                repository_name: ENV["GITHUB_REPO_NAME"],
                 tag_name: "v#{ENV["CI_PIPELINE_ID"]}",
                 name: "v#{ENV["CI_PIPELINE_ID"]}",
                 description: "Release v#{ENV["CI_PIPELINE_ID"]}",
