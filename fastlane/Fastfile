@@ -31,7 +31,7 @@ platform :android do
     desc "Increment version code"
     lane :increment_version do |options|
         increment_version_code(
-            gradle_file_path: "#{ENV["PROJECT_DIR"]}/app/build.gradle",
+            gradle_file_path: "#{ENV["PROJECT_DIR"]}app/build.gradle",
         )
     end
 
