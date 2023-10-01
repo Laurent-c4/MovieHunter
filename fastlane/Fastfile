@@ -28,6 +28,13 @@ platform :android do
         )
     end
 
+    desc "Increment version code"
+    lane :increment_version_code do |options|
+        increment_version_code(
+            gradle_file_path: "#{ENV["PROJECT_DIR"]}/app/build.gradle",
+        )
+    end
+
     desc "Build android"
     lane :build_release do |options|
         build_android_app(
