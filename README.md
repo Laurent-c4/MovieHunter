@@ -11,7 +11,7 @@ This is a movie search app that allows users to search for movies and view the m
 * [Contributing](#contributing)
 
 ## APK
-[Download](https://drive.google.com/uc?export=download&id=10iPdJjtqwqZdAU8SHSnJ9mjgQEVD-oeI)
+[Download](https://github.com/laurentjuma/moviehunter/releases)
 
 ## Installation
 Clone the repo and open in Android Studio.
