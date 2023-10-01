@@ -26,7 +26,7 @@ RUN apt-get update && \
 apt-get install --no-install-recommends -y --allow-unauthenticated build-essential git ruby-full graphicsmagick && \
 gem install bundler && \
 bundle install && \
-gem install fastlane-plugin-firebase_app_distribution fastlane-plugin-badge fastlane-plugin-increment_version_code&& \
+gem install fastlane-plugin-firebase_app_distribution fastlane-plugin-badge fastlane-plugin-increment_version_code && \
 # Clean up
 rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
 apt-get autoremove -y && \
